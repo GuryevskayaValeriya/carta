@@ -439,6 +439,26 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeMarker = null;
   let currentCategory = 'all';
 
+  // Функция для фильтрации маркеров на карте
+  function filterMarkersByCategory(category) {
+    markers.forEach(marker => {
+      const placeId = marker.options.placeId;
+      const place = PLACES.find(p => p.id === placeId);
+
+      if (category === 'all' || place.category === category) {
+        // Если маркер не на карте, добавляем
+        if (!map.hasLayer(marker)) {
+          marker.addTo(map);
+        }
+      } else {
+        // Если маркер на карте, удаляем
+        if (map.hasLayer(marker)) {
+          map.removeLayer(marker);
+        }
+      }
+    });
+  }
+
   // Функция для получения эмодзи категории
   function getCategoryEmoji(category) {
     const emojis = {
@@ -544,6 +564,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       container.appendChild(placeCard);
     });
+
+    // Если нет результатов
+    if (filteredPlaces.length === 0) {
+      const noResults = document.createElement('div');
+      noResults.style.textAlign = 'center';
+      noResults.style.padding = '30px 20px';
+      noResults.style.color = '#64748b';
+      noResults.innerHTML = `
+        <p style="font-size:1.1rem; margin-bottom:10px;">😕 Ничего не найдено</p>
+        <p style="font-size:0.9rem;">Попробуйте изменить параметры поиска</p>
+      `;
+      container.appendChild(noResults);
+    }
   }
 
   // Добавляем маркеры на карту
@@ -610,7 +643,12 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       button.classList.add('active');
       currentCategory = button.dataset.category;
+
+      // Фильтруем список мест
       renderPlaces('', currentCategory);
+
+      // Фильтруем маркеры на карте
+      filterMarkersByCategory(currentCategory);
     });
   });
 
