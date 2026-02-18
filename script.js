@@ -398,39 +398,42 @@ const PLACES = [
 document.addEventListener('DOMContentLoaded', () => {
   // Центр Тюмени
   const mapCenter = [57.1522, 65.5415];
-  const map = L.map('map').setView(mapCenter, 12);
+  const map = L.map('map', {
+    zoomControl: true,
+    fadeAnimation: true,
+    zoomAnimation: true
+  }).setView(mapCenter, 12);
 
-  // Слой карты (OpenStreetMap)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  }).addTo(map);
-
-  // Иконки для категорий
+// Цветная карта OpenStreetMap (классический стиль)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+}).addTo(map);
+  // Иконки для категорий (обновленный дизайн)
   const categoryIcons = {
     food: L.divIcon({
-      html: '<div style="background:#f59e0b;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">🍜</div>',
+      html: '<div style="background:#f59e0b;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(245,158,11,0.3);border:2px solid white;">🍜</div>',
       className: '',
-      iconSize: [30, 30]
+      iconSize: [36, 36]
     }),
     fun: L.divIcon({
-      html: '<div style="background:#8b5cf6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">🎉</div>',
+      html: '<div style="background:#8b5cf6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(139,92,246,0.3);border:2px solid white;">🎉</div>',
       className: '',
-      iconSize: [30, 30]
+      iconSize: [36, 36]
     }),
     study: L.divIcon({
-      html: '<div style="background:#10b981;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">📚</div>',
+      html: '<div style="background:#10b981;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(16,185,129,0.3);border:2px solid white;">📚</div>',
       className: '',
-      iconSize: [30, 30]
+      iconSize: [36, 36]
     }),
     print: L.divIcon({
-      html: '<div style="background:#ef4444;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">🖨️</div>',
+      html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(239,68,68,0.3);border:2px solid white;">🖨️</div>',
       className: '',
-      iconSize: [30, 30]
+      iconSize: [36, 36]
     }),
     work: L.divIcon({
-      html: '<div style="background:#3b82f6;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;">💼</div>',
+      html: '<div style="background:#3b82f6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(59,130,246,0.3);border:2px solid white;">💼</div>',
       className: '',
-      iconSize: [30, 30]
+      iconSize: [36, 36]
     })
   };
 
@@ -446,12 +449,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const place = PLACES.find(p => p.id === placeId);
 
       if (category === 'all' || place.category === category) {
-        // Если маркер не на карте, добавляем
         if (!map.hasLayer(marker)) {
           marker.addTo(map);
         }
       } else {
-        // Если маркер на карте, удаляем
         if (map.hasLayer(marker)) {
           map.removeLayer(marker);
         }
@@ -537,21 +538,18 @@ document.addEventListener('DOMContentLoaded', () => {
       placeCard.innerHTML = `
         <div class="place-card-header">
           <h3 class="place-name">${place.name}</h3>
-          <span class="place-category-badge">${getCategoryEmoji(place.category)}</span>
+          <span class="place-category-badge" style="background:${getCategoryColor(place.category)}">${getCategoryEmoji(place.category)}</span>
         </div>
         <div class="place-address">📍 ${place.address}</div>
         <div class="place-price">💰 ${priceDisplay} • 🕐 ${place.hours}</div>
       `;
 
       placeCard.addEventListener('click', () => {
-        // Активируем карточку
         document.querySelectorAll('.place-card').forEach(c => c.classList.remove('active'));
         placeCard.classList.add('active');
 
-        // Центрируем карту на месте
         map.setView(place.coordinates, 15);
 
-        // Открываем попап
         const marker = markers.find(m => m.options.placeId === place.id);
         if (marker) {
           marker.openPopup();
@@ -565,14 +563,12 @@ document.addEventListener('DOMContentLoaded', () => {
       container.appendChild(placeCard);
     });
 
-    // Если нет результатов
     if (filteredPlaces.length === 0) {
       const noResults = document.createElement('div');
-      noResults.style.textAlign = 'center';
-      noResults.style.padding = '30px 20px';
-      noResults.style.color = '#64748b';
+      noResults.className = 'no-results';
       noResults.innerHTML = `
-        <p style="font-size:1.1rem; margin-bottom:10px;">😕 Ничего не найдено</p>
+        <p>🔍</p>
+        <p style="font-size:1.1rem; margin-bottom:10px;">Ничего не найдено</p>
         <p style="font-size:0.9rem;">Попробуйте изменить параметры поиска</p>
       `;
       container.appendChild(noResults);
@@ -586,7 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
       placeId: place.id
     }).addTo(map);
 
-    // Создаём попап
     let popupContent = `
       <div class="popup-content">
         <div class="popup-title">${place.name}</div>
@@ -602,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (place.tips && place.tips.length > 0) {
       popupContent += `
         <div class="popup-tips">
-          <div style="font-size:0.8rem;font-weight:600;color:#64748b;margin-bottom:5px">💡 Лайфхаки:</div>
+          <div style="font-size:0.8rem;font-weight:600;color:#64748b;margin-bottom:8px">💡 Лайфхаки для студентов:</div>
           ${place.tips.map(tip => `<div class="popup-tip">${tip}</div>`).join('')}
         </div>
       `;
@@ -624,7 +619,6 @@ document.addEventListener('DOMContentLoaded', () => {
     marker.bindPopup(popupContent);
     markers.push(marker);
 
-    // Клик по маркеру активирует карточку
     marker.on('click', () => {
       document.querySelectorAll('.place-card').forEach(c => c.classList.remove('active'));
       const card = document.querySelector(`.place-card[data-id="${place.id}"]`);
@@ -644,10 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
       button.classList.add('active');
       currentCategory = button.dataset.category;
 
-      // Фильтруем список мест
       renderPlaces('', currentCategory);
-
-      // Фильтруем маркеры на карте
       filterMarkersByCategory(currentCategory);
     });
   });
@@ -661,37 +652,34 @@ document.addEventListener('DOMContentLoaded', () => {
   // ===== ИНИЦИАЛИЗАЦИЯ =====
   renderPlaces();
 
-  // Добавляем легенду карты
+  // Добавляем легенду карты (обновленный дизайн)
   const legend = L.control({position: 'bottomleft'});
 
   legend.onAdd = function () {
     const div = L.DomUtil.create('div', 'legend');
-    div.style.backgroundColor = 'white';
-    div.style.padding = '10px';
-    div.style.borderRadius = '8px';
-    div.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-    div.style.fontFamily = 'Arial, sans-serif';
     div.innerHTML = `
-      <div style="font-weight:bold;margin-bottom:8px">Категории:</div>
-      <div style="display:flex;align-items:center;margin-bottom:5px">
-        <span style="background:#f59e0b;color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:12px">🍜</span>
-        <span style="font-size:12px">Еда</span>
-      </div>
-      <div style="display:flex;align-items:center;margin-bottom:5px">
-        <span style="background:#8b5cf6;color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:12px">🎉</span>
-        <span style="font-size:12px">Досуг</span>
-      </div>
-      <div style="display:flex;align-items:center;margin-bottom:5px">
-        <span style="background:#10b981;color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:12px">📚</span>
-        <span style="font-size:12px">Учёба</span>
-      </div>
-      <div style="display:flex;align-items:center;margin-bottom:5px">
-        <span style="background:#ef4444;color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:12px">🖨️</span>
-        <span style="font-size:12px">Печать</span>
-      </div>
-      <div style="display:flex;align-items:center">
-        <span style="background:#3b82f6;color:white;width:24px;height:24px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-right:8px;font-size:12px">💼</span>
-        <span style="font-size:12px">Работа</span>
+      <div style="font-weight:700;margin-bottom:12px;color:#0f172a;font-size:0.9rem;">📍 Категории</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#f59e0b;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(245,158,11,0.3);">🍜</span>
+          <span style="font-size:0.85rem;color:#334155;">Еда</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#8b5cf6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(139,92,246,0.3);">🎉</span>
+          <span style="font-size:0.85rem;color:#334155;">Досуг</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#10b981;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(16,185,129,0.3);">📚</span>
+          <span style="font-size:0.85rem;color:#334155;">Учёба</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(239,68,68,0.3);">🖨️</span>
+          <span style="font-size:0.85rem;color:#334155;">Печать</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="background:#3b82f6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">💼</span>
+          <span style="font-size:0.85rem;color:#334155;">Работа</span>
+        </div>
       </div>
     `;
     return div;

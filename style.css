@@ -483,28 +483,14 @@ body {
   color: white;
 }
 
-/* Адаптив */
-@media (max-width: 968px) {
-  .main-content {
-    grid-template-columns: 1fr;
+/* ===== МОБИЛЬНАЯ ВЕРСИЯ ===== */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
   }
 
-  .places-list {
-    max-height: 50vh;
-  }
-
-  .map-container {
-    height: 60vh;
-  }
-
-  .logo {
-    font-size: 2.5rem;
-  }
-}
-
-@media (max-width: 480px) {
   .header {
-    padding: 40px 0 30px;
+    padding: 30px 0 25px;
   }
 
   .logo {
@@ -516,8 +502,12 @@ body {
   }
 
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
     padding: 10px 16px;
+  }
+
+  .search-section {
+    padding: 15px 0 10px;
   }
 
   .search-input {
@@ -525,26 +515,119 @@ body {
     font-size: 0.95rem;
   }
 
+  /* Фильтры (категории) - всегда сверху */
+  .filters-section {
+    padding: 10px 0 15px;
+  }
+
   .filters-container {
     gap: 8px;
     justify-content: flex-start;
     overflow-x: auto;
-    padding-bottom: 15px;
+    padding-bottom: 10px;
     flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .filters-container::-webkit-scrollbar {
+    display: none;
   }
 
   .filter-btn {
     padding: 10px 20px;
     font-size: 0.85rem;
     white-space: nowrap;
+    flex-shrink: 0;
   }
 
+  /* Мобильная структура: вертикальная с картой сверху */
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 0 30px;
+  }
+
+  /* КАРТА - теперь сверху (после фильтров) */
+  .map-container {
+    height: 40vh;
+    min-height: 300px;
+    order: 1; /* Карта будет первой */
+    margin-bottom: 0;
+  }
+
+  /* СПИСОК МЕСТ - теперь снизу (после карты) */
   .places-list {
-    padding: 20px;
+    max-height: 45vh;
+    min-height: 250px;
+    order: 2; /* Список будет вторым */
+    margin-bottom: 0;
   }
 
   .place-card {
     padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .place-card:active {
+    transform: scale(0.98);
+  }
+
+  .place-name {
+    font-size: 1rem;
+  }
+
+  .place-address, .place-price {
+    font-size: 0.85rem;
+  }
+
+  /* Попап на мобильных */
+  .popup-content {
+    max-width: 280px;
+  }
+
+  .popup-title {
+    font-size: 1.1rem;
+  }
+
+  .popup-tips {
+    padding: 12px;
+  }
+
+  .popup-link {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+  }
+
+  /* Скрываем легенду на мобильных */
+  .legend {
+    display: none !important;
+  }
+}
+
+/* Очень маленькие экраны */
+@media (max-width: 480px) {
+  .map-container {
+    height: 35vh;
+    min-height: 280px;
+  }
+
+  .places-list {
+    max-height: 50vh;
+    min-height: 250px;
+  }
+
+  .place-card {
+    padding: 14px;
+  }
+
+  .place-card-header {
+    margin-bottom: 8px;
+  }
+
+  .place-category-badge {
+    padding: 3px 10px;
+    font-size: 0.7rem;
   }
 }
 
@@ -619,4 +702,8 @@ body {
   background: rgba(255,255,255,0.95) !important;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.5) !important;
+}
+/* Скрыть легенду карты */
+.legend {
+  display: none !important;
 }

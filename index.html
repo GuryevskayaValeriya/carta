@@ -2,21 +2,21 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
   <title>STUDENTMAP Тюмень — Места для студентов</title>
 
-  <!-- Leaflet CSS (оставляем здесь, так как это внешняя библиотека) -->
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <!-- Подключаем наш отдельный CSS файл -->
+  <!-- Наш CSS -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <!-- Шапка -->
   <header class="header">
     <div class="container">
-      <h1 class="logo">🎓 STUDENTMAP Тюмень</h1>
-      <p class="subtitle">Недорого поесть, отдохнуть, учиться и подработать</p>
+      <h1 class="logo">🎓 STUDENTMAP</h1>
+      <p class="subtitle">Тюмень: еда, отдых, учёба и работа</p>
     </div>
   </header>
 
@@ -37,12 +37,12 @@
     </div>
   </section>
 
-  <!-- Фильтры -->
+  <!-- Фильтры (категории) - теперь всегда сверху -->
   <section class="filters-section">
     <div class="container">
       <div class="filters-container">
         <button class="filter-btn active all" data-category="all">
-          💰 Все места
+          💰 Все
         </button>
         <button class="filter-btn food" data-category="food">
           🍜 Еда
@@ -66,15 +66,15 @@
   <!-- Основной контент -->
   <main class="container">
     <div class="main-content">
-      <!-- Список мест -->
+      <!-- Список мест (на мобильных сверху) -->
       <aside class="places-list">
-        <h2 class="places-list-title">📍 Места в Тюмени</h2>
+        <h2 class="places-list-title">Места в Тюмени</h2>
         <div id="placesContainer">
-          <!-- Места будут вставляться сюда через JavaScript -->
+          <!-- Места будут вставляться сюда -->
         </div>
       </aside>
 
-      <!-- Карта -->
+      <!-- Карта с описанием (на мобильных снизу) -->
       <section class="map-container">
         <div id="map"></div>
       </section>
@@ -85,15 +85,14 @@
   <footer class="footer">
     <div class="container">
       <p>STUDENTMAP Тюмень © 2026</p>
-      <p>Все места проверены студентами ТюмГУ, ТИУ и ТюмГАСУ</p>
       <a href="#" class="footer-link">О проекте</a>
     </div>
   </footer>
 
-  <!-- Leaflet JS (библиотека для карты, оставляем) -->
+  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-  <!-- Подключаем наш отдельный JS файл -->
+  <!-- Наш JS (данные остаются те же) -->
   <script src="script.js"></script>
 </body>
 </html>
