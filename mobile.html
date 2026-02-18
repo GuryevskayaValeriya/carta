@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>STUDENTMAP Тюмень — Места для студентов</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Мобильный CSS -->
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+  <!-- Верхняя панель с фильтрами -->
+  <div class="top-bar">
+    <div class="filter-scroll">
+      <button class="filter-btn active" data-category="all">
+        <span class="filter-icon">💰</span>
+        <span class="filter-label">Все</span>
+      </button>
+      <button class="filter-btn" data-category="food">
+        <span class="filter-icon">🍜</span>
+        <span class="filter-label">Еда</span>
+      </button>
+      <button class="filter-btn" data-category="fun">
+        <span class="filter-icon">🎉</span>
+        <span class="filter-label">Досуг</span>
+      </button>
+      <button class="filter-btn" data-category="study">
+        <span class="filter-icon">📚</span>
+        <span class="filter-label">Учёба</span>
+      </button>
+      <button class="filter-btn" data-category="print">
+        <span class="filter-icon">🖨️</span>
+        <span class="filter-label">Печать</span>
+      </button>
+      <button class="filter-btn" data-category="work">
+        <span class="filter-icon">💼</span>
+        <span class="filter-label">Работа</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Карта на весь экран -->
+  <div id="map"></div>
+
+  <!-- Нижняя панель с поиском -->
+  <div class="bottom-bar">
+    <div class="search-container">
+      <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+      </svg>
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Найти место..."
+        class="search-input"
+      >
+    </div>
+  </div>
+
+  <!-- Выезжающая панель с результатами -->
+  <div class="results-panel" id="resultsPanel">
+    <div class="results-header">
+      <span class="results-title">📍 Найдено мест</span>
+      <span class="results-count" id="resultsCount">0</span>
+    </div>
+    <div class="results-list" id="resultsList">
+      <!-- Результаты будут здесь -->
+    </div>
+  </div>
+
+  <!-- Модальное окно заведения -->
+  <div class="place-modal" id="placeModal">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Контент будет здесь -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Мобильный JS -->
+  <script src="mobile.js"></script>
+</body>
+</html>
