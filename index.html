@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STUDENTMAP Тюмень — Места для студентов</title>
+
+  <!-- Leaflet CSS (оставляем здесь, так как это внешняя библиотека) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Подключаем наш отдельный CSS файл -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Шапка -->
+  <header class="header">
+    <div class="container">
+      <h1 class="logo">🎓 STUDENTMAP Тюмень</h1>
+      <p class="subtitle">Недорого поесть, отдохнуть, учиться и подработать</p>
+    </div>
+  </header>
+
+  <!-- Поиск -->
+  <section class="search-section">
+    <div class="container">
+      <div class="search-box">
+        <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+        </svg>
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Поиск по названию или адресу..."
+          class="search-input"
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- Фильтры -->
+  <section class="filters-section">
+    <div class="container">
+      <div class="filters-container">
+        <button class="filter-btn active all" data-category="all">
+          💰 Все места
+        </button>
+        <button class="filter-btn food" data-category="food">
+          🍜 Еда
+        </button>
+        <button class="filter-btn fun" data-category="fun">
+          🎉 Досуг
+        </button>
+        <button class="filter-btn study" data-category="study">
+          📚 Учёба
+        </button>
+        <button class="filter-btn print" data-category="print">
+          🖨️ Печать
+        </button>
+        <button class="filter-btn work" data-category="work">
+          💼 Работа
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Основной контент -->
+  <main class="container">
+    <div class="main-content">
+      <!-- Список мест -->
+      <aside class="places-list">
+        <h2 class="places-list-title">📍 Места в Тюмени</h2>
+        <div id="placesContainer">
+          <!-- Места будут вставляться сюда через JavaScript -->
+        </div>
+      </aside>
+
+      <!-- Карта -->
+      <section class="map-container">
+        <div id="map"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Футер -->
+  <footer class="footer">
+    <div class="container">
+      <p>STUDENTMAP Тюмень © 2026</p>
+      <p>Все места проверены студентами ТюмГУ, ТИУ и ТюмГАСУ</p>
+      <a href="#" class="footer-link">О проекте</a>
+    </div>
+  </footer>
+
+  <!-- Leaflet JS (библиотека для карты, оставляем) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Подключаем наш отдельный JS файл -->
+  <script src="script.js"></script>
+</body>
+</html>

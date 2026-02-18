@@ -1,0 +1,356 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #1e293b;
+  background-color: #f8fafc;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Шапка */
+.header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+  color: white;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+/* Поиск и фильтры */
+.search-section {
+  padding: 25px 0;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.search-box {
+  max-width: 600px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 14px 14px 45px;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #1e3a8a;
+}
+
+/* Фильтры */
+.filters-section {
+  padding: 20px 0;
+  background-color: white;
+}
+
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-btn {
+  padding: 10px 20px;
+  border: none;
+  background-color: #f1f5f9;
+  color: #475569;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-btn:hover {
+  background-color: #e2e8f0;
+}
+
+.filter-btn.active {
+  background-color: #1e3a8a;
+  color: white;
+  box-shadow: 0 4px 6px rgba(30, 58, 138, 0.3);
+}
+
+.filter-btn.all { background-color: #64748b; }
+.filter-btn.food { background-color: #f59e0b; }
+.filter-btn.fun { background-color: #8b5cf6; }
+.filter-btn.study { background-color: #10b981; }
+.filter-btn.print { background-color: #ef4444; }
+.filter-btn.work { background-color: #3b82f6; }
+
+/* Основной контент */
+.main-content {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 25px;
+  padding: 30px 0;
+}
+
+/* Список мест */
+.places-list {
+  background-color: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  height: fit-content;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.places-list-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.place-card {
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 15px;
+  border-left: 4px solid #1e3a8a;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.place-card:hover {
+  background-color: #f1f5f9;
+  transform: translateX(5px);
+}
+
+.place-card.active {
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-left: 4px solid #1e3a8a;
+}
+
+.place-card.food { border-left-color: #f59e0b; }
+.place-card.fun { border-left-color: #8b5cf6; }
+.place-card.study { border-left-color: #10b981; }
+.place-card.print { border-left-color: #ef4444; }
+.place-card.work { border-left-color: #3b82f6; }
+
+.place-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 8px;
+}
+
+.place-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.place-category-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  color: white;
+}
+
+.place-address {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin-bottom: 5px;
+}
+
+.place-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Карта */
+.map-container {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  height: 80vh;
+}
+
+#map {
+  height: 100%;
+  border-radius: 12px;
+}
+
+/* Попап карты */
+.popup-content {
+  max-width: 300px;
+}
+
+.popup-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #1e293b;
+}
+
+.popup-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 10px;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.popup-meta {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.popup-tips {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.popup-tip {
+  font-size: 0.85rem;
+  color: #475569;
+  margin-bottom: 5px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.popup-tip:before {
+  content: "💡";
+  position: absolute;
+  left: 0;
+}
+
+.popup-links {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.popup-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f1f5f9;
+  color: #1e3a8a;
+  text-decoration: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.popup-link:hover {
+  background-color: #e2e8f0;
+}
+
+/* Футер */
+.footer {
+  background-color: #0f172a;
+  color: #cbd5e1;
+  text-align: center;
+  padding: 30px 0;
+  margin-top: 40px;
+}
+
+.footer-link {
+  color: #60a5fa;
+  text-decoration: none;
+  margin-top: 10px;
+  display: inline-block;
+}
+
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Адаптив */
+@media (max-width: 968px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+
+  .places-list {
+    max-height: 40vh;
+  }
+
+  .map-container {
+    height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 30px 0 25px;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+
+  .search-input {
+    padding: 12px 12px 12px 40px;
+    font-size: 0.95rem;
+  }
+
+  .filters-container {
+    gap: 6px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+
+  .filter-btn {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+}
