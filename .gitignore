@@ -1,0 +1,29 @@
+# База данных
+carta.db
+
+# Зависимости Node.js
+node_modules/
+
+# Lock файл (можно коммитить, но если не нужен — игнорируем)
+# package-lock.json
+
+# Логи
+*.log
+npm-debug.log*
+
+# Операционные системы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Временные файлы
+*.tmp
+*.temp
+
+# Ошибки npm
+npm-error.log
