@@ -36,12 +36,13 @@ function initApp() {
   const map = L.map('map', {
     zoomControl: true,
     fadeAnimation: true,
-    zoomAnimation: true
+    zoomAnimation: true,
+    attributionControl: false
   }).setView(mapCenter, 12);
 
 // Цветная карта OpenStreetMap (классический стиль)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  attribution: ''
 }).addTo(map);
   // Иконки для категорий (обновленный дизайн)
   const categoryIcons = {
@@ -114,25 +115,33 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   }
 
   // Функция рендера списка мест
-  function renderPlaces(searchTerm = '', category = 'all') {
+  function renderPlaces(category = 'all', search = '', priceMin = 0, priceMax = Infinity) {
     const container = document.getElementById('placesContainer');
     container.innerHTML = '';
 
-    // Фильтруем места
+    // Фильтруем места по категории, поиску и цене
     let filteredPlaces = PLACES;
 
-    // По категории
     if (category !== 'all') {
       filteredPlaces = filteredPlaces.filter(place => place.category === category);
     }
 
-    // По поиску
-    if (searchTerm) {
+    if (search) {
+      const searchTerm = search.toLowerCase();
       filteredPlaces = filteredPlaces.filter(place =>
         place.name.toLowerCase().includes(searchTerm) ||
         place.address.toLowerCase().includes(searchTerm)
       );
     }
+
+    // Фильтр по цене
+    filteredPlaces = filteredPlaces.filter(place => {
+      const placeMinPrice = place.price.min;
+      const placeMaxPrice = place.price.max;
+      // Место попадает в диапазон, если его минимальная цена <= максимума фильтра
+      // и его максимальная цена >= минимума фильтра
+      return placeMinPrice <= priceMax && placeMaxPrice >= priceMin;
+    });
 
     // Рендерим карточки
     filteredPlaces.forEach(place => {
@@ -201,16 +210,58 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       button.classList.add('active');
       currentCategory = button.dataset.category;
 
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      await loadPlacesFromAPI(currentCategory, searchTerm);
+      await loadPlacesFromAPI(currentCategory, currentSearchTerm);
     });
   });
 
   // ===== ПОИСК =====
+  let currentSearchTerm = '';
+
   document.getElementById('searchInput').addEventListener('input', async (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    await loadPlacesFromAPI(currentCategory, searchTerm);
+    currentSearchTerm = e.target.value.toLowerCase();
+    await loadPlacesFromAPI(currentCategory, currentSearchTerm);
   });
+
+  // ===== ФИЛЬТР ЦЕНЫ =====
+  let currentPriceMin = 0;
+  let currentPriceMax = 5000;
+
+  const priceMinSlider = document.getElementById('priceMin');
+  const priceMaxSlider = document.getElementById('priceMax');
+  const priceMinValue = document.getElementById('priceMinValue');
+  const priceMaxValue = document.getElementById('priceMaxValue');
+
+  function updatePriceFilter() {
+    let min = parseInt(priceMinSlider.value);
+    let max = parseInt(priceMaxSlider.value);
+
+    // Гарантируем, что min <= max
+    if (min > max) {
+      // Если двигали min и он стал больше max, меняем max
+      if (priceMinSlider === document.activeElement) {
+        max = min;
+        priceMaxSlider.value = max;
+      } else {
+        min = max;
+        priceMinSlider.value = min;
+      }
+    }
+
+    currentPriceMin = min;
+    currentPriceMax = max;
+
+    priceMinValue.textContent = `${min}₽`;
+    priceMaxValue.textContent = `${max}₽`;
+
+    applyPriceFilter();
+  }
+
+  function applyPriceFilter() {
+    renderPlaces(currentCategory, currentSearchTerm, currentPriceMin, currentPriceMax);
+  }
+
+  priceMinSlider.addEventListener('input', updatePriceFilter);
+  priceMaxSlider.addEventListener('input', updatePriceFilter);
 
   // Загрузка мест из API с фильтрами
   async function loadPlacesFromAPI(category, search) {
@@ -218,18 +269,18 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       const params = new URLSearchParams();
       if (category && category !== 'all') params.append('category', category);
       if (search) params.append('search', search);
-      
+
       const response = await fetch(`${API_BASE_URL}/places?${params}`);
       if (!response.ok) throw new Error('Ошибка загрузки данных');
       PLACES = await response.json();
-      
+
       // Очищаем маркеры
       markers.forEach(marker => map.removeLayer(marker));
       markers = [];
       activeMarker = null;
-      
-      // Перерисовываем всё
-      renderPlaces();
+
+      // Перерисовываем всё (поиск уже применён на сервере)
+      renderPlaces(category, search, currentPriceMin, currentPriceMax);
       addMarkersToMap();
     } catch (error) {
       console.error('Ошибка:', error);
@@ -293,7 +344,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   }
 
   // Инициализация - рендерим места и добавляем маркеры
-  renderPlaces();
+  renderPlaces('all', '', 0, 5000);
   addMarkersToMap();
 
   // Добавляем легенду карты (обновленный дизайн)
@@ -330,4 +381,53 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   };
 
   legend.addTo(map);
+
+  // ===== АВТОМАТИЧЕСКАЯ ГЕОЛОКАЦИЯ ПРИ ЗАГРУЗКЕ =====
+  let userMarker = null;
+  let userCircle = null;
+
+  function requestGeolocation() {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        const userLocation = [latitude, longitude];
+
+        // Добавляем маркер пользователя
+        userMarker = L.marker(userLocation, {
+          icon: L.divIcon({
+            html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+            className: '',
+            iconSize: [40, 40]
+          })
+        }).addTo(map);
+
+        // Добавляем круг точности
+        userCircle = L.circle(userLocation, {
+          radius: accuracy,
+          color: '#3b82f6',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.1,
+          weight: 1
+        }).addTo(map);
+
+        // Центрируем карту на пользователе
+        map.setView(userLocation, 15);
+        userMarker.bindPopup('<b>Вы здесь!</b><br>Точность: ~' + Math.round(accuracy) + 'м').openPopup();
+      },
+      (error) => {
+        // Тихо игнорируем ошибку (пользователь мог отказать в доступе)
+        console.log('Геолокация недоступна:', error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+  }
+
+  // Запрашиваем геолокацию после загрузки карты
+  requestGeolocation();
 }

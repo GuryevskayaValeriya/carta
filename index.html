@@ -19,73 +19,64 @@
   </script>
 </head>
 <body>
-  <!-- Шапка -->
+  <!-- Шапка с поиском -->
   <header class="header">
-    <div class="container">
-      <h1 class="logo">🎓 STUDENTMAP</h1>
-      <p class="subtitle">Тюмень: еда, отдых, учёба и работа</p>
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="logo">🎓 STUDENTMAP</h1>
+        <p class="subtitle">Тюмень: еда, отдых, учёба и работа</p>
+      </div>
+      <div class="header-search">
+        <div class="search-box">
+          <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Поиск по названию или адресу..."
+            class="search-input"
+          >
+        </div>
+      </div>
+      <div class="header-filters">
+        <button class="filter-btn active all" data-category="all">Все</button>
+        <button class="filter-btn food" data-category="food">Еда</button>
+        <button class="filter-btn fun" data-category="fun">Досуг</button>
+        <button class="filter-btn study" data-category="study">Учёба</button>
+        <button class="filter-btn print" data-category="print">Печать</button>
+        <button class="filter-btn work" data-category="work">Работа</button>
+      </div>
+      <div class="price-filter">
+        <span class="price-filter-label">💰 Цена:</span>
+        <div class="price-slider-container">
+          <input type="range" id="priceMin" min="0" max="5000" value="0" class="price-slider">
+          <input type="range" id="priceMax" min="0" max="5000" value="5000" class="price-slider">
+        </div>
+        <div class="price-values">
+          <span id="priceMinValue">0₽</span>
+          <span id="priceMaxValue">5000₽</span>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- Поиск -->
-  <section class="search-section">
-    <div class="container">
-      <div class="search-box">
-        <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-        </svg>
-        <input
-          type="text"
-          id="searchInput"
-          placeholder="Поиск по названию или адресу..."
-          class="search-input"
-        >
-      </div>
-    </div>
-  </section>
-
-  <!-- Фильтры (категории) - теперь всегда сверху -->
-  <section class="filters-section">
-    <div class="container">
-      <div class="filters-container">
-        <button class="filter-btn active all" data-category="all">
-          💰 Все
-        </button>
-        <button class="filter-btn food" data-category="food">
-          🍜 Еда
-        </button>
-        <button class="filter-btn fun" data-category="fun">
-          🎉 Досуг
-        </button>
-        <button class="filter-btn study" data-category="study">
-          📚 Учёба
-        </button>
-        <button class="filter-btn print" data-category="print">
-          🖨️ Печать
-        </button>
-        <button class="filter-btn work" data-category="work">
-          💼 Работа
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Основной контент -->
-  <main class="container">
-    <div class="main-content">
-      <!-- Список мест (на мобильных сверху) -->
-      <aside class="places-list">
-        <h2 class="places-list-title">Места в Тюмени</h2>
+  <!-- Основной контент: карта на весь экран + панель слева -->
+  <main class="main-wrapper">
+    <!-- Боковая панель со списком мест -->
+    <aside class="sidebar">
+      <div class="sidebar-content">
+        <h2 class="sidebar-title">📍 Места</h2>
         <div id="placesContainer">
           <!-- Места будут вставляться сюда -->
         </div>
-      </aside>
+      </div>
+    </aside>
 
-      <!-- Карта с описанием (на мобильных снизу) -->
-      <section class="map-container">
-        <div id="map"></div>
-      </section>
-    </div>
+    <!-- Карта на весь экран -->
+    <section class="map-fullscreen">
+      <div id="map"></div>
+    </section>
   </main>
 
   <!-- Футер -->
