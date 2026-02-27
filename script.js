@@ -1,5 +1,5 @@
 // ===== API CONFIG =====
-const API_BASE_URL = 'http://localhost:3000/api';
+const API_BASE_URL = '/api';
 
 // Глобальное хранилище данных
 let PLACES = [];
