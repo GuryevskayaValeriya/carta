@@ -366,6 +366,7 @@ function initApp() {
   document.getElementById('modalBackdrop')?.addEventListener('click', closeModal);
 
   // Инициализация - показать все места
+  visiblePlaces = PLACES;
   updateResults();
 
   // ===== ГЕОЛОКАЦИЯ =====
