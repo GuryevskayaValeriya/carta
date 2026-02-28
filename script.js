@@ -40,37 +40,29 @@ function initApp() {
     attributionControl: false
   }).setView(mapCenter, 12);
 
-// Цветная карта OpenStreetMap (классический стиль)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: ''
-}).addTo(map);
-  // Иконки для категорий (обновленный дизайн)
+  // Цветная карта OpenStreetMap (классический стиль)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: ''
+  }).addTo(map);
+
+  // Функция для создания иконки
+  function createCategoryIcon(emoji, color) {
+    return L.divIcon({
+      html: `<div style="background:${color};color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px ${color}4D;border:2px solid white;">${emoji}</div>`,
+      className: 'custom-marker',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18],
+      popupAnchor: [0, -18]
+    });
+  }
+
+  // Иконки для категорий
   const categoryIcons = {
-    food: L.divIcon({
-      html: '<div style="background:#f59e0b;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(245,158,11,0.3);border:2px solid white;">🍜</div>',
-      className: '',
-      iconSize: [36, 36]
-    }),
-    fun: L.divIcon({
-      html: '<div style="background:#8b5cf6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(139,92,246,0.3);border:2px solid white;">🎉</div>',
-      className: '',
-      iconSize: [36, 36]
-    }),
-    study: L.divIcon({
-      html: '<div style="background:#10b981;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(16,185,129,0.3);border:2px solid white;">📚</div>',
-      className: '',
-      iconSize: [36, 36]
-    }),
-    print: L.divIcon({
-      html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(239,68,68,0.3);border:2px solid white;">🖨️</div>',
-      className: '',
-      iconSize: [36, 36]
-    }),
-    work: L.divIcon({
-      html: '<div style="background:#3b82f6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(59,130,246,0.3);border:2px solid white;">💼</div>',
-      className: '',
-      iconSize: [36, 36]
-    })
+    food: createCategoryIcon('🍜', '#F59E0B'),
+    fun: createCategoryIcon('🎉', '#8B5CF6'),
+    study: createCategoryIcon('📚', '#10B981'),
+    print: createCategoryIcon('🖨️', '#3B82F6'),
+    work: createCategoryIcon('💼', '#64748b')
   };
 
   // Маркеры
@@ -105,11 +97,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   // Функция для получения цвета категории
   function getCategoryColor(category) {
     const colors = {
-      food: '#f59e0b',
-      fun: '#8b5cf6',
-      study: '#10b981',
-      print: '#ef4444',
-      work: '#3b82f6'
+      food: '#F59E0B',
+      fun: '#8B5CF6',
+      study: '#10B981',
+      print: '#3B82F6'
     };
     return colors[category] || '#64748b';
   }
@@ -356,24 +347,20 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       <div style="font-weight:700;margin-bottom:12px;color:#0f172a;font-size:0.9rem;">📍 Категории</div>
       <div style="display:flex;flex-direction:column;gap:6px;">
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#f59e0b;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(245,158,11,0.3);">🍜</span>
+          <span style="background:#F59E0B;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(245,158,11,0.3);">🍜</span>
           <span style="font-size:0.85rem;color:#334155;">Еда</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#8b5cf6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(139,92,246,0.3);">🎉</span>
+          <span style="background:#8B5CF6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(139,92,246,0.3);">🎉</span>
           <span style="font-size:0.85rem;color:#334155;">Досуг</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#10b981;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(16,185,129,0.3);">📚</span>
+          <span style="background:#10B981;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(16,185,129,0.3);">📚</span>
           <span style="font-size:0.85rem;color:#334155;">Учёба</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(239,68,68,0.3);">🖨️</span>
+          <span style="background:#3B82F6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">🖨️</span>
           <span style="font-size:0.85rem;color:#334155;">Печать</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#3b82f6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">💼</span>
-          <span style="font-size:0.85rem;color:#334155;">Работа</span>
         </div>
       </div>
     `;
@@ -397,7 +384,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         // Добавляем маркер пользователя
         userMarker = L.marker(userLocation, {
           icon: L.divIcon({
-            html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+            html: '<div style="background:#2563eb;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(37,99,235,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
             className: '',
             iconSize: [40, 40]
           })
@@ -406,8 +393,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         // Добавляем круг точности
         userCircle = L.circle(userLocation, {
           radius: accuracy,
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
+          color: '#2563eb',
+          fillColor: '#2563eb',
           fillOpacity: 0.1,
           weight: 1
         }).addTo(map);

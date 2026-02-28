@@ -138,10 +138,25 @@ body {
   transform: translateY(-1px);
 }
 
-.filter-btn.active {
-  background: white;
-  color: #1e3a8a;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+/* Цвета для активных фильтров по категориям */
+.filter-btn.study.active {
+  background: #10B981;
+  color: white;
+}
+
+.filter-btn.food.active {
+  background: #F59E0B;
+  color: white;
+}
+
+.filter-btn.print.active {
+  background: #3B82F6;
+  color: white;
+}
+
+.filter-btn.fun.active {
+  background: #8B5CF6;
+  color: white;
 }
 
 /* Фильтр цены */
@@ -316,11 +331,10 @@ body {
   border-top: 1px solid #e2e8f0;
 }
 
-.place-card.food { border-left-color: #f59e0b; }
-.place-card.fun { border-left-color: #8b5cf6; }
-.place-card.study { border-left-color: #10b981; }
-.place-card.print { border-left-color: #ef4444; }
-.place-card.work { border-left-color: #3b82f6; }
+.place-card.food { border-left-color: #F59E0B; }
+.place-card.fun { border-left-color: #8B5CF6; }
+.place-card.study { border-left-color: #10B981; }
+.place-card.print { border-left-color: #3B82F6; }
 
 .place-card-header {
   display: flex;

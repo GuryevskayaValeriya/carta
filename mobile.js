@@ -13,11 +13,10 @@ let visiblePlaces = [];
 // Конфигурация категорий
 const categories = {
   all: { emoji: '💰', name: 'Все', color: '#94a3b8' },
-  food: { emoji: '🍜', name: 'Еда', color: '#f59e0b' },
-  fun: { emoji: '🎉', name: 'Досуг', color: '#8b5cf6' },
-  study: { emoji: '📚', name: 'Учёба', color: '#10b981' },
-  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' },
-  work: { emoji: '💼', name: 'Работа', color: '#3b82f6' }
+  food: { emoji: '🍜', name: 'Еда', color: '#F59E0B' },
+  fun: { emoji: '🎉', name: 'Досуг', color: '#8B5CF6' },
+  study: { emoji: '📚', name: 'Учёба', color: '#10B981' },
+  print: { emoji: '🖨️', name: 'Печать', color: '#3B82F6' }
 };
 
 // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
@@ -47,27 +46,45 @@ async function loadPlaces() {
   }
 }
 
-// Создание иконок для маркеров
+// Создание иконок для маркеров с адаптивным размером
 function createMarkerIcon(category) {
   const cat = categories[category] || categories.all;
+  
+  // Адаптивный размер иконки в зависимости от ширины экрана
+  let iconSize = 40;
+  let fontSize = 20;
+  
+  if (window.innerWidth <= 360) {
+    iconSize = 32;
+    fontSize = 16;
+  } else if (window.innerWidth <= 420) {
+    iconSize = 36;
+    fontSize = 18;
+  } else if (window.innerWidth >= 835) {
+    iconSize = 44;
+    fontSize = 22;
+  }
+  
+  const halfSize = iconSize / 2;
+  
   return L.divIcon({
     html: `<div style="
       background: ${cat.color};
       color: white;
-      width: 40px;
-      height: 40px;
+      width: ${iconSize}px;
+      height: ${iconSize}px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: ${fontSize}px;
       box-shadow: 0 3px 12px ${cat.color}66, 0 0 0 3px rgba(255,255,255,0.4);
       border: 2px solid white;
     ">${cat.emoji}</div>`,
     className: '',
-    iconSize: [40, 40],
-    iconAnchor: [20, 20],
-    popupAnchor: [0, -10]
+    iconSize: [iconSize, iconSize],
+    iconAnchor: [halfSize, halfSize],
+    popupAnchor: [0, -halfSize - 5]
   });
 }
 
@@ -389,7 +406,7 @@ function requestGeolocation() {
       // Добавляем маркер пользователя
       userMarker = L.marker(userLocation, {
         icon: L.divIcon({
-          html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+          html: '<div style="background:#2563eb;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(37,99,235,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
           className: '',
           iconSize: [40, 40]
         })
@@ -398,8 +415,8 @@ function requestGeolocation() {
       // Добавляем круг точности
       userCircle = L.circle(userLocation, {
         radius: accuracy,
-        color: '#3b82f6',
-        fillColor: '#3b82f6',
+        color: '#2563eb',
+        fillColor: '#2563eb',
         fillOpacity: 0.1,
         weight: 1
       }).addTo(map);

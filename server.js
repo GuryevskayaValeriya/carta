@@ -59,104 +59,22 @@ const PLACES_DATA = [
     }),
     verified: 1
   },
-  {
-    id: 'food-3',
-    category: 'food',
-    name: 'Кафе «Книги и Кофе»',
-    description: 'Уютное кафе рядом с библиотекой им. Лермонтова',
-    price_min: 120,
-    price_max: 250,
-    hours: '9:00–21:00',
-    address: 'ул. Республики, 60',
-    lat: 57.150500,
-    lng: 65.544865,
-    tips: JSON.stringify([
-      'Скидка 15% по студаку до 16:00',
-      'Бесплатный Wi-Fi и розетки у окон',
-      'Можно сидеть час без чувства вины'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/chain/knigi_i_kofe/236773987201/?ll=65.568900%2C57.151200&z=17'
-    }),
-    verified: 1
-  },
-  {
-    id: 'food-4',
-    category: 'food',
-    name: 'Теремок',
-    description: 'Быстро и сытно — идеально между парами',
-    price_min: 130,
-    price_max: 220,
-    hours: '8:00–22:00',
-    address: 'ул. Ленина, 38',
-    lat: 57.155030,
-    lng: 65.532082,
-    tips: JSON.stringify([
-      'Блинчики с мясом 159₽ — хватит на 2 пары',
-      'Можно заказать навынос через приложение',
-      'Студенческая скидка 10% по средам'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/teremok/1657452843/?ll=65.564500%2C57.148900&z=17'
-    }),
-    verified: 1
-  },
-  {
-    id: 'food-5',
-    category: 'food',
-    name: 'Ларёк «Шаурма у универа»',
-    description: 'Быстро, дёшево, без очередей',
-    price_min: 90,
-    price_max: 150,
-    hours: '9:00–21:00',
-    address: 'ул. Семакова, 8 (у входа в ТюмГУ)',
-    lat: 57.159658,
-    lng: 65.531750,
-    tips: JSON.stringify([
-      'Шаурма 120₽ — готовят на месте',
-      'Кофе 50₽, хот-дог 70₽',
-      'Можно оплатить картой'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.567000%2C57.145400&z=17'
-    }),
-    verified: 1
-  },
-  {
-    id: 'food-6',
-    category: 'food',
-    name: 'Пятёрочка',
-    description: 'Супермаркет с горячей линией и готовой едой',
-    price_min: 70,
-    price_max: 180,
-    hours: 'Круглосуточно',
-    address: 'ул. Семакова, 15',
-    lat: 57.158438,
-    lng: 65.530591,
-    tips: JSON.stringify([
-      'Пельмени 120₽ за упаковку (хватит на 2 раза)',
-      'Горячая линия: курица гриль 149₽',
-      'Скидки по карте Пятёрочки'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/pyatyorochka/1588693477/?ll=65.568000%2C57.145900&z=17'
-    }),
-    verified: 1
-  },
+
+
   {
     id: 'fun-1',
     category: 'fun',
-    name: 'Парк «Гагарина»',
-    description: 'Большой парк с лавочками, фонтанами и бесплатными мероприятиями',
+    name: 'Цветной бульвар',
+    description: 'Парк развлечений с бесплатными мероприятиями',
     price_min: 0,
-    price_max: 0,
+    price_max: 500,
     hours: 'Круглосуточно',
-    address: 'ул. Гагарина',
-    lat: 57.172437,
-    lng: 65.621755,
+    address: 'Цветной бульвар',
+    lat: 57.151173,
+    lng: 65.537692,
     tips: JSON.stringify([
-      'Летом — бесплатные концерты по выходным',
-      'Много скамеек в тени для учёбы',
+      'Летом — много бесплатных концертов',
+      'Можно прокатиться на аттракционах',
       'Рядом фонтан — красиво вечером'
     ]),
     links: JSON.stringify({
@@ -293,43 +211,42 @@ const PLACES_DATA = [
   {
     id: 'print-1',
     category: 'print',
-    name: 'Типография «Печать+»',
-    description: 'Печать курсовых, дипломов, плакатов со скидкой',
-    price_min: 5,
-    price_max: 500,
-    hours: '9:00–19:00',
-    address: 'ул. Республики, 45',
-    lat: 57.153961,
-    lng: 65.539143,
-    discount: '15% по студаку',
+    name: 'Скрепка',
+    description: 'Печать курсовых, дипломов, канцтовары',
+    price_min: 0,
+    price_max: 300,
+    hours: '9:00–20:00',
+    address: 'ул. 50 лет Октября, 36',
+    lat: 57.146908,
+    lng: 65.5779585,
     tips: JSON.stringify([
-      'Курсовая 50 страниц = 350₽ со скидкой',
-      'Диплом в твёрдом переплёте — 1200₽',
-      'Срочный заказ (+50%) готов за 2 часа'
+      'Можно оплатить картой',
+      'Скан документов — 10₽ за страницу',
+      'Менее загружена до 17:00'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.568500%2C57.150500&z=17'
+      map: 'https://yandex.ru/maps/org/skrepka/204428098295/?ll=65.579923%2C57.143019&mode=search&sctx=ZAAAAAgBEAAaKAoSCRqnIarwYlBAEVoSoKaWkUxAEhIJqmQAqOJG4T8RuHcN%2BtLb1T8iBgABAgMEBSgKOABAk40GSAFiOnJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9FbmFibGVkPTFiOnJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9NYXhhZHY9MTViRHJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9SZWdpb25JZHM9WzEsMTAxNzRdYkByZWFycj1zY2hlbWVfTG9jYWwvR2VvdXBwZXIvQWR2ZXJ0cy9NYXhhZHZUb3BNaXgvTWF4YWR2Rm9yTWl4PTEwagJydZ0BzczMPaABAKgBAL0BbgL8%2BsIBEbui7NYGu9iuqKYC9%2FX0xvkFggIO0YHQutGA0LXQv9C60LCKAgCSAgCaAgxkZXNrdG9wLW1hcHM%3D&sll=65.579923%2C57.143019&sspn=0.037964%2C0.024012&text=%D1%81%D0%BA%D1%80%D0%B5%D0%BF%D0%BA%D0%B0&z=14.25'
     }),
     verified: 1
   },
   {
     id: 'print-2',
     category: 'print',
-    name: 'Почта России',
-    description: 'Распечатка, сканирование, копирование',
-    price_min: 5,
-    price_max: 200,
+    name: 'Скрепка',
+    description: 'Печать курсовых, дипломов, канцтовары',
+    price_min: 0,
+    price_max: 300,
     hours: '9:00–20:00',
-    address: 'ул. Ленина, 25',
-    lat: 57.158164,
-    lng: 65.527249,
+    address: 'ул. Мельникайте, 80',
+    lat: 57.142175,
+    lng: 65.575732,
     tips: JSON.stringify([
       'Можно оплатить картой',
       'Скан документов — 10₽ за страницу',
-      'Менее загружена после 17:00'
+      'Менее загружена до 17:00'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/pochta_rossii/1075840733/?ll=65.563000%2C57.148000&z=17'
+      map: 'https://yandex.ru/maps/org/skrepka/1792741691/?ll=65.579923%2C57.143019&mode=search&sctx=ZAAAAAgBEAAaKAoSCRqnIarwYlBAEVoSoKaWkUxAEhIJqmQAqOJG4T8RuHcN%2BtLb1T8iBgABAgMEBSgKOABAk40GSAFiOnJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9FbmFibGVkPTFiOnJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9NYXhhZHY9MTViRHJlYXJyPXNjaGVtZV9Mb2NhbC9HZW91cHBlci9BZHZlcnRzL0N1c3RvbU1heGFkdi9SZWdpb25JZHM9WzEsMTAxNzRdYkByZWFycj1zY2hlbWVfTG9jYWwvR2VvdXBwZXIvQWR2ZXJ0cy9NYXhhZHZUb3BNaXgvTWF4YWR2Rm9yTWl4PTEwagJydZ0BzczMPaABAKgBAL0BbgL8%2BsIBEbui7NYGu9iuqKYC9%2FX0xvkFggIO0YHQutGA0LXQv9C60LCKAgCSAgCaAgxkZXNrdG9wLW1hcHM%3D&sll=65.579923%2C57.143019&sspn=0.037964%2C0.024012&text=%D1%81%D0%BA%D1%80%D0%B5%D0%BF%D0%BA%D0%B0&z=14.25'
     }),
     verified: 1
   },
@@ -352,95 +269,6 @@ const PLACES_DATA = [
     ]),
     links: JSON.stringify({
       map: 'https://yandex.ru/maps/59/tiumen/?ll=65.567500%2C57.145700&z=17'
-    }),
-    verified: 1
-  },
-  {
-    id: 'work-1',
-    category: 'work',
-    name: 'Агентство «Промо-Тюмень»',
-    description: 'Промоакции, раздача листовок, мероприятия',
-    price_min: 1500,
-    price_max: 3000,
-    price_unit: '₽/день',
-    hours: 'По сменам',
-    address: 'ул. Республики, 50',
-    lat: 57.152213,
-    lng: 65.539772,
-    tips: JSON.stringify([
-      'Берут без опыта',
-      'Платят сразу после смены',
-      'Гибкий график — можно только по выходным'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.568700%2C57.150800&z=17',
-      website: 'https://promo-tyumen.ru'
-    }),
-    verified: 1
-  },
-  {
-    id: 'work-2',
-    category: 'work',
-    name: 'Колл-центр «Созвучие»',
-    description: 'Оператор на входящие/исходящие звонки',
-    price_min: 30000,
-    price_max: 50000,
-    price_unit: '₽/мес',
-    hours: 'Гибкий график',
-    address: 'ул. Максима Горького, 74',
-    lat: 57.146740,
-    lng: 65.557630,
-    tips: JSON.stringify([
-      'Обучение 3 дня (оплачивается)',
-      'Можно работать удалённо',
-      'Берут студентов с 18 лет'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.562000%2C57.153500&z=17'
-    }),
-    verified: 1
-  },
-  {
-    id: 'work-3',
-    category: 'work',
-    name: 'Репетиторство через ТюмГУ',
-    description: 'Помощь младшим курсам по предметам',
-    price_min: 800,
-    price_max: 1500,
-    price_unit: '₽/час',
-    hours: 'По договорённости',
-    address: 'ул. Семакова, 10 (ТюмГУ)',
-    lat: 57.159375,
-    lng: 65.531265,
-    tips: JSON.stringify([
-      'Объявления на доске в главном корпусе',
-      'Можно подать заявку на сайте вуза',
-      'Оплата наличными после занятия'
-    ]),
-    links: JSON.stringify({
-      website: 'https://utmn.ru'
-    }),
-    verified: 1
-  },
-  {
-    id: 'work-4',
-    category: 'work',
-    name: 'Яндекс.Еда — курьер',
-    description: 'Доставка еды на велосипеде или самокате',
-    price_min: 1000,
-    price_max: 2000,
-    price_unit: '₽/день',
-    hours: 'Любое время',
-    address: 'Регистрация онлайн',
-    lat: 57.1500,
-    lng: 65.5650,
-    tips: JSON.stringify([
-      'Свободный график',
-      'Можно работать только по выходным',
-      'Нужен свой транспорт'
-    ]),
-    links: JSON.stringify({
-      website: 'https://eda.yandex/delivery'
     }),
     verified: 1
   }
