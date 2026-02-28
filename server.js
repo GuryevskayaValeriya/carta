@@ -11,6 +11,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
+
 // Подключение к PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
