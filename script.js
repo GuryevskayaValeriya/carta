@@ -68,11 +68,6 @@ function initApp() {
       html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(239,68,68,0.3);border:2px solid white;">🖨️</div>',
       className: '',
       iconSize: [36, 36]
-    }),
-    work: L.divIcon({
-      html: '<div style="background:#3b82f6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(59,130,246,0.3);border:2px solid white;">💼</div>',
-      className: '',
-      iconSize: [36, 36]
     })
   };
 
@@ -87,8 +82,7 @@ function initApp() {
       food: '🍜',
       fun: '🎉',
       study: '📚',
-      print: '🖨️',
-      work: '💼'
+      print: '🖨️'
     };
     return emojis[category] || '📍';
   }
@@ -99,8 +93,7 @@ function initApp() {
       food: 'Еда',
       fun: 'Досуг',
       study: 'Учёба',
-      print: 'Печать',
-      work: 'Работа'
+      print: 'Печать'
     };
     return names[category] || 'Место';
   }
@@ -111,8 +104,7 @@ function initApp() {
       food: '#f59e0b',
       fun: '#8b5cf6',
       study: '#10b981',
-      print: '#ef4444',
-      work: '#3b82f6'
+      print: '#ef4444'
     };
     return colors[category] || '#64748b';
   }
@@ -131,11 +123,11 @@ function initApp() {
   }
 
   // Функция рендера списка мест
-  function renderPlaces(category = 'all', search = '', priceMin = 0, priceMax = Infinity) {
+  function renderPlaces(category = 'all', search = '') {
     const container = document.getElementById('placesContainer');
     container.innerHTML = '';
 
-    // Фильтруем места по категории, поиску и цене
+    // Фильтруем места по категории и поиску
     let filteredPlaces = PLACES;
 
     if (category !== 'all') {
@@ -149,13 +141,6 @@ function initApp() {
         place.address.toLowerCase().includes(searchTerm)
       );
     }
-
-    // Фильтр по цене
-    filteredPlaces = filteredPlaces.filter(place => {
-      const placeMinPrice = place.price.min;
-      const placeMaxPrice = place.price.max;
-      return placeMinPrice <= priceMax && placeMaxPrice >= priceMin;
-    });
 
     // Рендерим карточки
     filteredPlaces.forEach(place => {
@@ -226,44 +211,7 @@ function initApp() {
   });
 
   // ===== ФИЛЬТР ЦЕНЫ =====
-  let currentPriceMin = 0;
-  let currentPriceMax = 5000;
-
-  const priceMinSlider = document.getElementById('priceMin');
-  const priceMaxSlider = document.getElementById('priceMax');
-  const priceMinValue = document.getElementById('priceMinValue');
-  const priceMaxValue = document.getElementById('priceMaxValue');
-
-  function updatePriceFilter() {
-    let min = parseInt(priceMinSlider.value);
-    let max = parseInt(priceMaxSlider.value);
-
-    // Гарантируем, что min <= max
-    if (min > max) {
-      if (priceMinSlider === document.activeElement) {
-        max = min;
-        priceMaxSlider.value = max;
-      } else {
-        min = max;
-        priceMinSlider.value = min;
-      }
-    }
-
-    currentPriceMin = min;
-    currentPriceMax = max;
-
-    priceMinValue.textContent = `${min}₽`;
-    priceMaxValue.textContent = `${max}₽`;
-
-    applyPriceFilter();
-  }
-
-  function applyPriceFilter() {
-    renderPlaces(currentCategory, currentSearchTerm, currentPriceMin, currentPriceMax);
-  }
-
-  priceMinSlider.addEventListener('input', updatePriceFilter);
-  priceMaxSlider.addEventListener('input', updatePriceFilter);
+  // Фильтр по цене удалён
 
   // Загрузка мест из API с фильтрами
   async function loadPlacesFromAPI(category, search) {
@@ -282,7 +230,7 @@ function initApp() {
       activeMarker = null;
 
       // Перерисовываем всё
-      renderPlaces(category, search, currentPriceMin, currentPriceMax);
+      renderPlaces(category, search);
       addMarkersToMap();
     } catch (error) {
       console.error('Ошибка:', error);
@@ -360,7 +308,7 @@ function initApp() {
         // Добавляем маркер пользователя
         userMarker = L.marker(userLocation, {
           icon: L.divIcon({
-            html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+            html: '<div style="background:linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
             className: '',
             iconSize: [40, 40]
           })
@@ -377,7 +325,7 @@ function initApp() {
 
         // Центрируем карту на пользователе
         map.setView(userLocation, 15);
-        userMarker.bindPopup('<b>Вы здесь!</b><br>Точность: ~' + Math.round(accuracy) + 'м').openPopup();
+        userMarker.bindPopup('<b>Вы здесь!</b>').openPopup();
       },
       (error) => {
         console.log('Геолокация недоступна:', error.message);
@@ -394,7 +342,7 @@ function initApp() {
   requestGeolocation();
 
   // Инициализация - рендерим места и добавляем маркеры
-  renderPlaces('all', '', 0, 5000);
+  renderPlaces('all', '');
   addMarkersToMap();
 
   // Добавляем легенду карты (обновленный дизайн)
@@ -420,10 +368,6 @@ function initApp() {
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(239,68,68,0.3);">🖨️</span>
           <span style="font-size:0.85rem;color:#334155;">Печать</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#3b82f6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">💼</span>
-          <span style="font-size:0.85rem;color:#334155;">Работа</span>
         </div>
       </div>
     `;

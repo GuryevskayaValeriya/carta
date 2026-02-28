@@ -26,7 +26,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(120deg, #0a1e4a 0%, #1e3a8a 50%, #2563eb 100%);
+  background: linear-gradient(45deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);
   color: white;
   padding: 16px 24px;
   z-index: 1000;
@@ -37,13 +37,14 @@ body {
   display: flex;
   align-items: center;
   gap: 24px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .header-left {
   display: flex;
   align-items: center;
   gap: 20px;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -71,8 +72,7 @@ body {
 /* Поиск в шапке */
 .header-search {
   flex: 1;
-  min-width: 200px;
-  max-width: 500px;
+  max-width: 600px;
 }
 
 .search-box {
@@ -116,7 +116,8 @@ body {
 .header-filters {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  margin-left: auto;
 }
 
 .filter-btn {
@@ -141,89 +142,6 @@ body {
   background: white;
   color: #1e3a8a;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-}
-
-/* Фильтр цены */
-.price-filter {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 16px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 20px;
-  flex-wrap: nowrap;
-}
-
-.price-filter-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.price-slider-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  position: relative;
-}
-
-.price-slider {
-  -webkit-appearance: none;
-  width: 100px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(255,255,255,0.3);
-  outline: none;
-  cursor: pointer;
-}
-
-.price-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  transition: all 0.2s;
-}
-
-.price-slider::-webkit-slider-thumb:hover {
-  background: #f0f9ff;
-  box-shadow: 0 2px 8px rgba(255,255,255,0.4);
-  transform: scale(1.1);
-}
-
-.price-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: white;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  border: none;
-  transition: all 0.2s;
-}
-
-.price-slider::-moz-range-thumb:hover {
-  background: #f0f9ff;
-  box-shadow: 0 2px 8px rgba(255,255,255,0.4);
-  transform: scale(1.1);
-}
-
-.price-values {
-  display: flex;
-  gap: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.price-values span {
-  background: rgba(255,255,255,0.2);
-  padding: 2px 8px;
-  border-radius: 12px;
 }
 
 /* Основной wrapper - карта на весь экран */
@@ -319,7 +237,6 @@ body {
 .place-card.fun { border-left-color: #8b5cf6; }
 .place-card.study { border-left-color: #10b981; }
 .place-card.print { border-left-color: #ef4444; }
-.place-card.work { border-left-color: #3b82f6; }
 
 .place-card-header {
   display: flex;
@@ -511,22 +428,6 @@ body {
     overflow-x: auto;
   }
 
-  .price-filter {
-    order: 4;
-    width: 100%;
-    justify-content: space-between;
-    padding: 10px 12px;
-  }
-
-  .price-slider-container {
-    flex: 1;
-    margin: 0 8px;
-  }
-
-  .price-slider {
-    width: 80px;
-  }
-
   .geo-btn {
     padding: 6px 12px;
     font-size: 1rem;
@@ -683,18 +584,30 @@ body {
   box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
 }
 
+/* Геолокация - попап с местом для крестика */
+.geolocation-popup .leaflet-popup-content-wrapper {
+  padding-top: 50px !important;
+}
+
 .leaflet-popup-close-button {
   color: #64748b !important;
   font-size: 20px !important;
   font-weight: 300 !important;
-  top: 12px !important;
-  right: 12px !important;
+  top: 8px !important;
+  right: 8px !important;
   width: 24px !important;
   height: 24px !important;
   line-height: 24px !important;
   border-radius: 50% !important;
   background: #f1f5f9 !important;
   transition: all 0.3s !important;
+  z-index: 1001 !important;
+}
+
+/* Кнопка закрытия для попапа геолокации - выше */
+.geolocation-popup .leaflet-popup-close-button {
+  top: -40px !important;
+  right: 8px !important;
 }
 
 .leaflet-popup-close-button:hover {

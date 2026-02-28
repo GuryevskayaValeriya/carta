@@ -16,8 +16,7 @@ const categories = {
   food: { emoji: '🍜', name: 'Еда', color: '#f59e0b' },
   fun: { emoji: '🎉', name: 'Досуг', color: '#8b5cf6' },
   study: { emoji: '📚', name: 'Учёба', color: '#10b981' },
-  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' },
-  work: { emoji: '💼', name: 'Работа', color: '#3b82f6' }
+  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' }
 };
 
 // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
@@ -390,7 +389,7 @@ function requestGeolocation() {
       // Добавляем маркер пользователя
       userMarker = L.marker(userLocation, {
         icon: L.divIcon({
-          html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+          html: '<div style="background:linear-gradient(135deg, #1e3a8a 0%, #3b82f6 50%, #06b6d4 100%);color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
           className: '',
           iconSize: [40, 40]
         })
@@ -407,7 +406,7 @@ function requestGeolocation() {
 
       // Центрируем карту на пользователе
       map.setView(userLocation, 15);
-      userMarker.bindPopup('<b>📍 Вы здесь!</b><br><span style="font-size: 13px; font-weight: 500; opacity: 0.95;">Точность: ~' + Math.round(accuracy) + 'м</span>', {
+      userMarker.bindPopup('<b>📍 Вы здесь!</b>', {
         className: 'geolocation-popup',
         autoClose: false,
         closeOnClick: false
