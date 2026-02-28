@@ -6,7 +6,6 @@ let PLACES = [];
 
 // ===== ИНИЦИАЛИЗАЦИЯ КАРТЫ И ПРИЛОЖЕНИЯ =====
 document.addEventListener('DOMContentLoaded', () => {
-  // Загрузка данных из API
   loadPlaces();
 });
 
@@ -19,13 +18,16 @@ async function loadPlaces() {
     initApp();
   } catch (error) {
     console.error('Ошибка:', error);
-    document.getElementById('placesContainer').innerHTML = `
-      <div class="no-results">
-        <p>⚠️</p>
-        <p style="font-size:1.1rem; margin-bottom:10px;">Ошибка загрузки данных</p>
-        <p style="font-size:0.9rem;">Убедитесь, что сервер запущен (npm start)</p>
-      </div>
-    `;
+    const container = document.getElementById('placesContainer');
+    if (container) {
+      container.innerHTML = `
+        <div class="no-results">
+          <p>⚠️</p>
+          <p style="font-size:1.1rem; margin-bottom:10px;">Ошибка загрузки данных</p>
+          <p style="font-size:0.9rem;">Убедитесь, что сервер запущен (npm start)</p>
+        </div>
+      `;
+    }
   }
 }
 
@@ -40,10 +42,11 @@ function initApp() {
     attributionControl: false
   }).setView(mapCenter, 12);
 
-// Цветная карта OpenStreetMap (классический стиль)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: ''
-}).addTo(map);
+  // Цветная карта OpenStreetMap (классический стиль)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: ''
+  }).addTo(map);
+
   // Иконки для категорий (обновленный дизайн)
   const categoryIcons = {
     food: L.divIcon({
@@ -114,6 +117,19 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     return colors[category] || '#64748b';
   }
 
+  // Функция форматирования цены
+  function formatPrice(price) {
+    if (price.min === price.max) {
+      return `${price.min}₽`;
+    } else if (price.min === 0 && price.max === 0) {
+      return 'Бесплатно';
+    } else if (price.unit) {
+      return `${price.min}–${price.max} ${price.unit}`;
+    } else {
+      return `${price.min}–${price.max}₽`;
+    }
+  }
+
   // Функция рендера списка мест
   function renderPlaces(category = 'all', search = '', priceMin = 0, priceMax = Infinity) {
     const container = document.getElementById('placesContainer');
@@ -138,25 +154,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     filteredPlaces = filteredPlaces.filter(place => {
       const placeMinPrice = place.price.min;
       const placeMaxPrice = place.price.max;
-      // Место попадает в диапазон, если его минимальная цена <= максимума фильтра
-      // и его максимальная цена >= минимума фильтра
       return placeMinPrice <= priceMax && placeMaxPrice >= priceMin;
     });
 
     // Рендерим карточки
     filteredPlaces.forEach(place => {
-      let priceDisplay = '';
-      if (place.price.min === place.price.max) {
-        priceDisplay = `${place.price.min}₽`;
-      } else if (place.price.min === 0 && place.price.max === 0) {
-        priceDisplay = 'Бесплатно';
-      } else {
-        priceDisplay = `${place.price.min}–${place.price.max}₽`;
-      }
-
-      if (place.price.unit) {
-        priceDisplay = `${place.price.min}–${place.price.max} ${place.price.unit}`;
-      }
+      const priceDisplay = formatPrice(place.price);
 
       const placeCard = document.createElement('div');
       placeCard.className = `place-card ${place.category}`;
@@ -237,7 +240,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 
     // Гарантируем, что min <= max
     if (min > max) {
-      // Если двигали min и он стал больше max, меняем max
       if (priceMinSlider === document.activeElement) {
         max = min;
         priceMaxSlider.value = max;
@@ -279,7 +281,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       markers = [];
       activeMarker = null;
 
-      // Перерисовываем всё (поиск уже применён на сервере)
+      // Перерисовываем всё
       renderPlaces(category, search, currentPriceMin, currentPriceMax);
       addMarkersToMap();
     } catch (error) {
@@ -300,7 +302,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           <div class="popup-title">${place.name}</div>
           <span class="popup-category" style="background-color:${getCategoryColor(place.category)}">${getCategoryEmoji(place.category)} ${getCategoryName(place.category)}</span>
           <div class="popup-meta">📍 ${place.address}</div>
-          <div class="popup-meta">💰 ${place.price.min}–${place.price.max}₽ • 🕐 ${place.hours}</div>
+          <div class="popup-meta">💰 ${formatPrice(place.price)} • 🕐 ${place.hours}</div>
       `;
 
       if (place.discount) {
@@ -343,6 +345,54 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     });
   }
 
+  // ===== ГЕОЛОКАЦИЯ =====
+  let userMarker = null;
+  let userCircle = null;
+
+  function requestGeolocation() {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        const userLocation = [latitude, longitude];
+
+        // Добавляем маркер пользователя
+        userMarker = L.marker(userLocation, {
+          icon: L.divIcon({
+            html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
+            className: '',
+            iconSize: [40, 40]
+          })
+        }).addTo(map);
+
+        // Добавляем круг точности
+        userCircle = L.circle(userLocation, {
+          radius: accuracy,
+          color: '#3b82f6',
+          fillColor: '#3b82f6',
+          fillOpacity: 0.1,
+          weight: 1
+        }).addTo(map);
+
+        // Центрируем карту на пользователе
+        map.setView(userLocation, 15);
+        userMarker.bindPopup('<b>Вы здесь!</b><br>Точность: ~' + Math.round(accuracy) + 'м').openPopup();
+      },
+      (error) => {
+        console.log('Геолокация недоступна:', error.message);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000
+      }
+    );
+  }
+
+  // Запрашиваем геолокацию после загрузки карты
+  requestGeolocation();
+
   // Инициализация - рендерим места и добавляем маркеры
   renderPlaces('all', '', 0, 5000);
   addMarkersToMap();
@@ -381,53 +431,4 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   };
 
   legend.addTo(map);
-
-  // ===== АВТОМАТИЧЕСКАЯ ГЕОЛОКАЦИЯ ПРИ ЗАГРУЗКЕ =====
-  let userMarker = null;
-  let userCircle = null;
-
-  function requestGeolocation() {
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude, accuracy } = position.coords;
-        const userLocation = [latitude, longitude];
-
-        // Добавляем маркер пользователя
-        userMarker = L.marker(userLocation, {
-          icon: L.divIcon({
-            html: '<div style="background:#3b82f6;color:white;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 0 10px rgba(59,130,246,0.3),0 4px 10px rgba(0,0,0,0.2);border:3px solid white;">📍</div>',
-            className: '',
-            iconSize: [40, 40]
-          })
-        }).addTo(map);
-
-        // Добавляем круг точности
-        userCircle = L.circle(userLocation, {
-          radius: accuracy,
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
-          fillOpacity: 0.1,
-          weight: 1
-        }).addTo(map);
-
-        // Центрируем карту на пользователе
-        map.setView(userLocation, 15);
-        userMarker.bindPopup('<b>Вы здесь!</b><br>Точность: ~' + Math.round(accuracy) + 'м').openPopup();
-      },
-      (error) => {
-        // Тихо игнорируем ошибку (пользователь мог отказать в доступе)
-        console.log('Геолокация недоступна:', error.message);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 300000
-      }
-    );
-  }
-
-  // Запрашиваем геолокацию после загрузки карты
-  requestGeolocation();
 }

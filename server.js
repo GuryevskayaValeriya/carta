@@ -17,6 +17,41 @@ const pool = new Pool({
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
+// ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
+
+// Безопасный парсинг JSON
+function safeJsonParse(value, defaultValue) {
+  if (!value) return defaultValue;
+  try {
+    return JSON.parse(value);
+  } catch (err) {
+    console.warn('Ошибка парсинга JSON:', err);
+    return defaultValue;
+  }
+}
+
+// Преобразование строки базы данных в объект места
+function rowToPlace(row) {
+  return {
+    id: row.id,
+    category: row.category,
+    name: row.name,
+    description: row.description,
+    price: {
+      min: row.price_min,
+      max: row.price_max,
+      unit: row.price_unit || undefined
+    },
+    hours: row.hours,
+    address: row.address,
+    coordinates: [row.lat, row.lng],
+    discount: row.discount,
+    tips: safeJsonParse(row.tips, []),
+    links: safeJsonParse(row.links, {}),
+    verified: !!row.verified
+  };
+}
+
 // ===== API ENDPOINTS =====
 
 // Получить все места (с опциональной фильтрацией по категории и поиску)
@@ -34,24 +69,7 @@ app.get('/api/places', async (req, res) => {
 
   try {
     const result = await pool.query(query, params);
-    let places = result.rows.map(row => ({
-      id: row.id,
-      category: row.category,
-      name: row.name,
-      description: row.description,
-      price: {
-        min: row.price_min,
-        max: row.price_max,
-        unit: row.price_unit || undefined
-      },
-      hours: row.hours,
-      address: row.address,
-      coordinates: [row.lat, row.lng],
-      discount: row.discount,
-      tips: row.tips ? JSON.parse(row.tips) : [],
-      links: row.links ? JSON.parse(row.links) : {},
-      verified: !!row.verified
-    }));
+    let places = result.rows.map(rowToPlace);
 
     // Поиск на стороне клиента (для поддержки кириллицы)
     if (search) {
@@ -65,7 +83,7 @@ app.get('/api/places', async (req, res) => {
     res.json(places);
   } catch (err) {
     console.error('Ошибка при получении мест:', err);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: 'Ошибка сервера при загрузке мест' });
   }
 });
 
@@ -81,29 +99,11 @@ app.get('/api/places/:id', async (req, res) => {
       return res.status(404).json({ error: 'Место не найдено' });
     }
 
-    const place = {
-      id: row.id,
-      category: row.category,
-      name: row.name,
-      description: row.description,
-      price: {
-        min: row.price_min,
-        max: row.price_max,
-        unit: row.price_unit || undefined
-      },
-      hours: row.hours,
-      address: row.address,
-      coordinates: [row.lat, row.lng],
-      discount: row.discount,
-      tips: row.tips ? JSON.parse(row.tips) : [],
-      links: row.links ? JSON.parse(row.links) : {},
-      verified: !!row.verified
-    };
-
+    const place = rowToPlace(row);
     res.json(place);
   } catch (err) {
     console.error('Ошибка при получении места:', err);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: 'Ошибка сервера при загрузке места' });
   }
 });
 
@@ -115,7 +115,7 @@ app.get('/api/categories', async (req, res) => {
     res.json(categories);
   } catch (err) {
     console.error('Ошибка при получении категорий:', err);
-    res.status(500).json({ error: 'Ошибка сервера' });
+    res.status(500).json({ error: 'Ошибка сервера при загрузке категорий' });
   }
 });
 
@@ -123,4 +123,5 @@ app.get('/api/categories', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен: http://localhost:${PORT}`);
   console.log(`📡 API доступно: http://localhost:${PORT}/api/places`);
+  console.log(`📊 Категории: http://localhost:${PORT}/api/categories`);
 });
