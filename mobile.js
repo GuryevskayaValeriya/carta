@@ -1,5 +1,5 @@
 // ===== API CONFIG =====
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 // Глобальное хранилище данных
 let PLACES = [];
@@ -383,7 +383,6 @@ function initApp() {
   document.getElementById('modalBackdrop')?.addEventListener('click', closeModal);
 
   // Инициализация - показать все места
-  visiblePlaces = PLACES;
   updateResults();
 
   // ===== ГЕОЛОКАЦИЯ =====
