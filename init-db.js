@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Pool } = require('pg');
 
 // Подключение к PostgreSQL
@@ -346,95 +347,6 @@ const PLACES_DATA = [
     }),
     verified: true
   },
-  {
-    id: 'work-1',
-    category: 'work',
-    name: 'Агентство «Промо-Тюмень»',
-    description: 'Промоакции, раздача листовок, мероприятия',
-    price_min: 1500,
-    price_max: 3000,
-    price_unit: '₽/день',
-    hours: 'По сменам',
-    address: 'ул. Республики, 50',
-    lat: 57.152213,
-    lng: 65.539772,
-    tips: JSON.stringify([
-      'Берут без опыта',
-      'Платят сразу после смены',
-      'Гибкий график — можно только по выходным'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.568700%2C57.150800&z=17',
-      website: 'https://promo-tyumen.ru'
-    }),
-    verified: true
-  },
-  {
-    id: 'work-2',
-    category: 'work',
-    name: 'Колл-центр «Созвучие»',
-    description: 'Оператор на входящие/исходящие звонки',
-    price_min: 30000,
-    price_max: 50000,
-    price_unit: '₽/мес',
-    hours: 'Гибкий график',
-    address: 'ул. Максима Горького, 74',
-    lat: 57.146740,
-    lng: 65.557630,
-    tips: JSON.stringify([
-      'Обучение 3 дня (оплачивается)',
-      'Можно работать удалённо',
-      'Берут студентов с 18 лет'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.562000%2C57.153500&z=17'
-    }),
-    verified: true
-  },
-  {
-    id: 'work-3',
-    category: 'work',
-    name: 'Репетиторство через ТюмГУ',
-    description: 'Помощь младшим курсам по предметам',
-    price_min: 800,
-    price_max: 1500,
-    price_unit: '₽/час',
-    hours: 'По договорённости',
-    address: 'ул. Семакова, 10 (ТюмГУ)',
-    lat: 57.159375,
-    lng: 65.531265,
-    tips: JSON.stringify([
-      'Объявления на доске в главном корпусе',
-      'Можно подать заявку на сайте вуза',
-      'Оплата наличными после занятия'
-    ]),
-    links: JSON.stringify({
-      website: 'https://utmn.ru'
-    }),
-    verified: true
-  },
-  {
-    id: 'work-4',
-    category: 'work',
-    name: 'Яндекс.Еда — курьер',
-    description: 'Доставка еды на велосипеде или самокате',
-    price_min: 1000,
-    price_max: 2000,
-    price_unit: '₽/день',
-    hours: 'Любое время',
-    address: 'Регистрация онлайн',
-    lat: 57.1500,
-    lng: 65.5650,
-    tips: JSON.stringify([
-      'Свободный график',
-      'Можно работать только по выходным',
-      'Нужен свой транспорт'
-    ]),
-    links: JSON.stringify({
-      website: 'https://eda.yandex/delivery'
-    }),
-    verified: true
-  }
 ];
 
 async function initDatabase() {

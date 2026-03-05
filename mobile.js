@@ -16,8 +16,7 @@ const categories = {
   food: { emoji: '🍜', name: 'Еда', color: '#f59e0b' },
   fun: { emoji: '🎉', name: 'Досуг', color: '#8b5cf6' },
   study: { emoji: '📚', name: 'Учёба', color: '#10b981' },
-  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' },
-  work: { emoji: '💼', name: 'Работа', color: '#3b82f6' }
+  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' }
 };
 
 // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====

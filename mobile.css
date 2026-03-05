@@ -42,7 +42,7 @@ body {
 
 .filter-scroll {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 6px;
 }
 
@@ -104,12 +104,6 @@ body {
 .filter-btn[data-category="print"].active {
   background: #ef4444;
   border-color: #ef4444;
-  color: white;
-}
-
-.filter-btn[data-category="work"].active {
-  background: #3b82f6;
-  border-color: #3b82f6;
   color: white;
 }
 

@@ -320,7 +320,6 @@ body {
 .place-card.fun { border-left-color: #8b5cf6; }
 .place-card.study { border-left-color: #10b981; }
 .place-card.print { border-left-color: #ef4444; }
-.place-card.work { border-left-color: #3b82f6; }
 
 .place-card-header {
   display: flex;

@@ -66,11 +66,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       className: '',
       iconSize: [36, 36]
     }),
-    work: L.divIcon({
-      html: '<div style="background:#3b82f6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(59,130,246,0.3);border:2px solid white;">💼</div>',
-      className: '',
-      iconSize: [36, 36]
-    })
   };
 
   // Маркеры
@@ -84,8 +79,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       food: '🍜',
       fun: '🎉',
       study: '📚',
-      print: '🖨️',
-      work: '💼'
+      print: '🖨️'
     };
     return emojis[category] || '📍';
   }
@@ -96,8 +90,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       food: 'Еда',
       fun: 'Досуг',
       study: 'Учёба',
-      print: 'Печать',
-      work: 'Работа'
+      print: 'Печать'
     };
     return names[category] || 'Место';
   }
@@ -108,8 +101,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       food: '#f59e0b',
       fun: '#8b5cf6',
       study: '#10b981',
-      print: '#ef4444',
-      work: '#3b82f6'
+      print: '#ef4444'
     };
     return colors[category] || '#64748b';
   }
@@ -370,10 +362,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(239,68,68,0.3);">🖨️</span>
           <span style="font-size:0.85rem;color:#334155;">Печать</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#3b82f6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(59,130,246,0.3);">💼</span>
-          <span style="font-size:0.85rem;color:#334155;">Работа</span>
         </div>
       </div>
     `;
