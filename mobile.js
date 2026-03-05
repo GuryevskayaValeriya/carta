@@ -13,10 +13,10 @@ let visiblePlaces = [];
 // Конфигурация категорий
 const categories = {
   all: { emoji: '💰', name: 'Все', color: '#94a3b8' },
-  food: { emoji: '🍜', name: 'Еда', color: '#f59e0b' },
+  food: { emoji: '🍜', name: 'Еда', color: '#fbbf24' },
   fun: { emoji: '🎉', name: 'Досуг', color: '#8b5cf6' },
-  study: { emoji: '📚', name: 'Учёба', color: '#10b981' },
-  print: { emoji: '🖨️', name: 'Печать', color: '#ef4444' }
+  study: { emoji: '📚', name: 'Учёба', color: '#34d399' },
+  print: { emoji: '🖨️', name: 'Печать', color: '#3b82f6' }
 };
 
 // ===== ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ =====
@@ -293,8 +293,8 @@ function initApp() {
     attributionControl: false
   }).setView(mapCenter, 13);
 
-  // Приятная светлая карта (CartoDB Positron)
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  // Цветная карта OpenStreetMap (классический стиль)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '',
     maxZoom: 20
   }).addTo(map);

@@ -47,7 +47,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   // Иконки для категорий (обновленный дизайн)
   const categoryIcons = {
     food: L.divIcon({
-      html: '<div style="background:#f59e0b;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(245,158,11,0.3);border:2px solid white;">🍜</div>',
+      html: '<div style="background:#fbbf24;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(251,191,36,0.3);border:2px solid white;">🍜</div>',
       className: '',
       iconSize: [36, 36]
     }),
@@ -57,12 +57,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       iconSize: [36, 36]
     }),
     study: L.divIcon({
-      html: '<div style="background:#10b981;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(16,185,129,0.3);border:2px solid white;">📚</div>',
+      html: '<div style="background:#34d399;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(52,211,153,0.3);border:2px solid white;">📚</div>',
       className: '',
       iconSize: [36, 36]
     }),
     print: L.divIcon({
-      html: '<div style="background:#ef4444;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(239,68,68,0.3);border:2px solid white;">🖨️</div>',
+      html: '<div style="background:#3b82f6;color:white;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;box-shadow:0 4px 10px rgba(59,130,246,0.3);border:2px solid white;">🖨️</div>',
       className: '',
       iconSize: [36, 36]
     }),
@@ -98,20 +98,20 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   // Функция для получения цвета категории
   function getCategoryColor(category) {
     const colors = {
-      food: '#f59e0b',
-      fun: '#8b5cf6',
-      study: '#10b981',
-      print: '#ef4444'
+      food: '#fbbf24',    // янтарный - тёплый, аппетитный
+      fun: '#8b5cf6',     // лаванда - креатив, праздник
+      study: '#34d399',   // мята - спокойствие, фокус
+      print: '#3b82f6'    // синий - технологии, надёжность
     };
     return colors[category] || '#64748b';
   }
 
   // Функция рендера списка мест
-  function renderPlaces(category = 'all', search = '', priceMin = 0, priceMax = Infinity) {
+  function renderPlaces(category = 'all', search = '') {
     const container = document.getElementById('placesContainer');
     container.innerHTML = '';
 
-    // Фильтруем места по категории, поиску и цене
+    // Фильтруем места по категории и поиску
     let filteredPlaces = PLACES;
 
     if (category !== 'all') {
@@ -125,15 +125,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         place.address.toLowerCase().includes(searchTerm)
       );
     }
-
-    // Фильтр по цене
-    filteredPlaces = filteredPlaces.filter(place => {
-      const placeMinPrice = place.price.min;
-      const placeMaxPrice = place.price.max;
-      // Место попадает в диапазон, если его минимальная цена <= максимума фильтра
-      // и его максимальная цена >= минимума фильтра
-      return placeMinPrice <= priceMax && placeMaxPrice >= priceMin;
-    });
 
     // Рендерим карточки
     filteredPlaces.forEach(place => {
@@ -214,47 +205,6 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     await loadPlacesFromAPI(currentCategory, currentSearchTerm);
   });
 
-  // ===== ФИЛЬТР ЦЕНЫ =====
-  let currentPriceMin = 0;
-  let currentPriceMax = 5000;
-
-  const priceMinSlider = document.getElementById('priceMin');
-  const priceMaxSlider = document.getElementById('priceMax');
-  const priceMinValue = document.getElementById('priceMinValue');
-  const priceMaxValue = document.getElementById('priceMaxValue');
-
-  function updatePriceFilter() {
-    let min = parseInt(priceMinSlider.value);
-    let max = parseInt(priceMaxSlider.value);
-
-    // Гарантируем, что min <= max
-    if (min > max) {
-      // Если двигали min и он стал больше max, меняем max
-      if (priceMinSlider === document.activeElement) {
-        max = min;
-        priceMaxSlider.value = max;
-      } else {
-        min = max;
-        priceMinSlider.value = min;
-      }
-    }
-
-    currentPriceMin = min;
-    currentPriceMax = max;
-
-    priceMinValue.textContent = `${min}₽`;
-    priceMaxValue.textContent = `${max}₽`;
-
-    applyPriceFilter();
-  }
-
-  function applyPriceFilter() {
-    renderPlaces(currentCategory, currentSearchTerm, currentPriceMin, currentPriceMax);
-  }
-
-  priceMinSlider.addEventListener('input', updatePriceFilter);
-  priceMaxSlider.addEventListener('input', updatePriceFilter);
-
   // Загрузка мест из API с фильтрами
   async function loadPlacesFromAPI(category, search) {
     try {
@@ -272,7 +222,7 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       activeMarker = null;
 
       // Перерисовываем всё (поиск уже применён на сервере)
-      renderPlaces(category, search, currentPriceMin, currentPriceMax);
+      renderPlaces(category, search);
       addMarkersToMap();
     } catch (error) {
       console.error('Ошибка:', error);
@@ -336,39 +286,8 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   }
 
   // Инициализация - рендерим места и добавляем маркеры
-  renderPlaces('all', '', 0, 5000);
+  renderPlaces('all', '');
   addMarkersToMap();
-
-  // Добавляем легенду карты (обновленный дизайн)
-  const legend = L.control({position: 'bottomleft'});
-
-  legend.onAdd = function () {
-    const div = L.DomUtil.create('div', 'legend');
-    div.innerHTML = `
-      <div style="font-weight:700;margin-bottom:12px;color:#0f172a;font-size:0.9rem;">📍 Категории</div>
-      <div style="display:flex;flex-direction:column;gap:6px;">
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#f59e0b;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(245,158,11,0.3);">🍜</span>
-          <span style="font-size:0.85rem;color:#334155;">Еда</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#8b5cf6;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(139,92,246,0.3);">🎉</span>
-          <span style="font-size:0.85rem;color:#334155;">Досуг</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#10b981;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(16,185,129,0.3);">📚</span>
-          <span style="font-size:0.85rem;color:#334155;">Учёба</span>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span style="background:#ef4444;color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(239,68,68,0.3);">🖨️</span>
-          <span style="font-size:0.85rem;color:#334155;">Печать</span>
-        </div>
-      </div>
-    `;
-    return div;
-  };
-
-  legend.addTo(map);
 
   // ===== АВТОМАТИЧЕСКАЯ ГЕОЛОКАЦИЯ ПРИ ЗАГРУЗКЕ =====
   let userMarker = null;
