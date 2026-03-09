@@ -12,341 +12,190 @@ const PLACES_DATA = [
   {
     id: 'food-1',
     category: 'food',
-    name: 'Столовая ТюмГУ',
-    description: 'Университетская столовая с бюджетными обедами',
-    price_min: 60,
-    price_max: 120,
-    hours: '8:00–17:00',
-    address: 'ул. Семакова, 10 (корпус ТюмГУ)',
-    lat: 57.1456,
-    lng: 65.5673,
+    name: 'Столовая Гренки',
+    description: 'Столовая с бюджетными ценами',
+    price_min: 0,
+    price_max: 800,
+    hours: '10:00–17:00',
+    address: 'ул. Пржевальского, 36',
+    lat: 57.139339,
+    lng: 65.586029,
     tips: JSON.stringify([
-      'Комплексный обед 85₽ (суп, второе, компот)',
-      'Меню обновляется каждый понедельник на сайте вуза',
-      'После 15:00 выбор меньше, но и очередей нет'
+      'Скидка студентам в любое время',
+      'Вкусный и сытный обед по доступной цене'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/house/ulitsa_semakova_10/Z04YcQFjS0MCQFtvfXR0dnVhZA==/?ll=65.567309%2C57.145601&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D0%B3%D1%80%D0%B5%D0%BD%D0%BA%D0%B8/firm/70000001084113168/65.585957%2C57.139347?m=65.618754%2C57.142608%2F12.54'
     }),
     verified: true
   },
   {
     id: 'food-2',
     category: 'food',
-    name: 'Столовая ТИУ',
-    description: 'Столовая Тюменского индустриального университета',
-    price_min: 55,
-    price_max: 110,
-    hours: '8:30–16:30',
-    address: 'ул. Володарского, 38',
-    lat: 57.152506,
-    lng: 65.544658,
+    name: 'Столовая Самовар',
+    description: 'Столовая с бюджетными ценами',
+    price_min: 0,
+    price_max: 800,
+    hours: '9:00–18:00',
+    address: 'ул. Станислава Карнацевича, 4',
+    lat: 57.104070,
+    lng: 65.572414,
     tips: JSON.stringify([
-      'Плов 65₽ — самый популярный выбор',
-      'Понедельник и четверг — самые загруженные дни',
-      'Можно оплатить картой студента'
+      'Комплексный обед за 250-300 р.',
+      'Вкусный и сытный обед по доступной цене'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/house/volodarskogo_ulitsa_38/Z04YcQFjSEECQFtvfXR0cHRsZA==/?ll=65.570500%2C57.147800&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%81%D0%B0%D0%BC%D0%BE%D0%B2%D0%B0%D1%80/firm/70000001023729240/65.572395%2C57.10407?m=65.572395%2C57.10407%2F12.54'
     }),
     verified: true
   },
   {
     id: 'food-3',
     category: 'food',
-    name: 'Кафе «Книги и Кофе»',
-    description: 'Уютное кафе рядом с библиотекой им. Лермонтова',
-    price_min: 120,
-    price_max: 250,
-    hours: '9:00–21:00',
-    address: 'ул. Республики, 60',
-    lat: 57.150500,
-    lng: 65.544865,
+    name: 'Кафе "Хинкальцы"',
+    description: 'Кафе грузинской кухни',
+    price_min: 0,
+    price_max: 500,
+    hours: '11:00–23:00',
+    address: 'ул. Республики, 149',
+    lat: 57.138522,
+    lng: 65.569475,
     tips: JSON.stringify([
-      'Скидка 15% по студаку до 16:00',
-      'Бесплатный Wi-Fi и розетки у окон',
-      'Можно сидеть час без чувства вины'
+      'Хинкали по 40-50 р/шт',
+      'Вкусный и быстрый обед или ужин'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/chain/knigi_i_kofe/236773987201/?ll=65.568900%2C57.151200&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%85%D0%B8%D0%BD%D0%BA%D0%B0%D0%BB%D1%8C%D1%86%D1%8B/firm/70000001101569542/65.569435%2C57.138524?m=65.572395%2C57.104096%2F12.54'
     }),
     verified: true
   },
   {
     id: 'food-4',
     category: 'food',
-    name: 'Теремок',
-    description: 'Быстро и сытно — идеально между парами',
-    price_min: 130,
-    price_max: 220,
-    hours: '8:00–22:00',
-    address: 'ул. Ленина, 38',
-    lat: 57.155030,
-    lng: 65.532082,
+    name: 'Кафе "Хинкальцы"',
+    description: 'Кафе грузинской кухни',
+    price_min: 0,
+    price_max: 500,
+    hours: '11:00–23:00',
+    address: 'ул. Республики, 46',
+    lat: 57.154222,
+    lng: 65.537676,
     tips: JSON.stringify([
-      'Блинчики с мясом 159₽ — хватит на 2 пары',
-      'Можно заказать навынос через приложение',
-      'Студенческая скидка 10% по средам'
+      'Хинкали по 40-50 р/шт',
+      'Вкусный и быстрый обед или ужин'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/teremok/1657452843/?ll=65.564500%2C57.148900&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%85%D0%B8%D0%BD%D0%BA%D0%B0%D0%BB%D1%8C%D1%86%D1%8B/firm/70000001111117324?m=65.572395%2C57.104096%2F11'
     }),
     verified: true
   },
-  {
-    id: 'food-5',
-    category: 'food',
-    name: 'Ларёк «Шаурма у универа»',
-    description: 'Быстро, дёшево, без очередей',
-    price_min: 90,
-    price_max: 150,
-    hours: '9:00–21:00',
-    address: 'ул. Семакова, 8 (у входа в ТюмГУ)',
-    lat: 57.159658,
-    lng: 65.531750,
-    tips: JSON.stringify([
-      'Шаурма 120₽ — готовят на месте',
-      'Кофе 50₽, хот-дог 70₽',
-      'Можно оплатить картой'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.567000%2C57.145400&z=17'
-    }),
-    verified: true
-  },
-  {
-    id: 'food-6',
-    category: 'food',
-    name: 'Пятёрочка',
-    description: 'Супермаркет с горячей линией и готовой едой',
-    price_min: 70,
-    price_max: 180,
-    hours: 'Круглосуточно',
-    address: 'ул. Семакова, 15',
-    lat: 57.158438,
-    lng: 65.530591,
-    tips: JSON.stringify([
-      'Пельмени 120₽ за упаковку (хватит на 2 раза)',
-      'Горячая линия: курица гриль 149₽',
-      'Скидки по карте Пятёрочки'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/pyatyorochka/1588693477/?ll=65.568000%2C57.145900&z=17'
-    }),
-    verified: true
-  },
+
   {
     id: 'fun-1',
     category: 'fun',
-    name: 'Парк «Гагарина»',
-    description: 'Большой парк с лавочками, фонтанами и бесплатными мероприятиями',
+    name: 'Парк им. Ю.А. Гагарина',
+    description: 'Большой парк с лавочками и бесплатными мероприятиями',
     price_min: 0,
     price_max: 0,
     hours: 'Круглосуточно',
     address: 'ул. Гагарина',
-    lat: 57.172437,
-    lng: 65.621755,
+    lat: 57.173864,
+    lng: 65.617471,
     tips: JSON.stringify([
-      'Летом — бесплатные концерты по выходным',
-      'Много скамеек в тени для учёбы',
-      'Рядом фонтан — красиво вечером'
+      'Красивые пейзажи зимой и летом',
+      'Подойдет для прогулки на природе',
+      'Каждую субботу в 9 утра - пробежка от "5 верст"'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/park/park_gagarina/207330381/?ll=65.550000%2C57.153000&z=15'
+      map: 'https://2gis.ru/tyumen/search/%D0%B3%D0%B0%D0%B3%D0%B0%D1%80%D0%B8%D0%BD%D0%B0?m=65.618754%2C57.171309%2F14.31'
     }),
     verified: true
   },
   {
     id: 'fun-2',
     category: 'fun',
-    name: 'Кинотеатр «Космос»',
-    description: 'Студенческие сеансы по выгодным ценам',
-    price_min: 180,
-    price_max: 350,
-    hours: '10:00–23:00',
-    address: 'ул. Республики, 100',
-    lat: 57.134313,
-    lng: 65.577316,
-    tips: JSON.stringify([
-      'Студенческий билет 220₽ в будние дни до 18:00',
-      'Попкорн можно принести свой',
-      'Забронировать места онлайн на сайте'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/kosmos/1486791835/?ll=65.569500%2C57.152500&z=17'
-    }),
-    verified: true
-  },
-  {
-    id: 'fun-3',
-    category: 'fun',
-    name: 'Настольный клуб «Игротека»',
-    description: 'Более 150 настольных игр и уютная атмосфера',
+    name: 'Цветной бульвар',
+    description: 'Парк развлечений',
     price_min: 0,
-    price_max: 200,
-    hours: '12:00–23:00',
-    address: 'ул. Ленина, 38',
-    lat: 57.155030,
-    lng: 65.532082,
+    price_max: 500,
+    hours: 'Круглосуточно',
+    address: 'Цветной бульвар',
+    lat: 57.151164,
+    lng: 65.537705,
     tips: JSON.stringify([
-      'Первый час бесплатно для студентов по вторникам',
-      'Можно прийти одному — найдут компанию',
-      'Чай и печенье включены в цену'
+      'С колеса обозрения открывается прекрасный вид на город',
+      'Можно посидеть на лавочках в тени'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.564500%2C57.148900&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%86%D0%B2%D0%B5%D1%82%D0%BD%D0%BE%D0%B9%20%D0%B1%D1%83%D0%BB%D1%8C%D0%B2%D0%B0%D1%80/firm/70000001103170744/65.538672%2C57.150488?m=65.539915%2C57.150623%2F16.17'
     }),
     verified: true
   },
+
   {
     id: 'study-1',
     category: 'study',
     name: 'Библиотека им. М.Ю. Лермонтова',
     description: 'Главная городская библиотека с читальными залами',
     price_min: 0,
-    price_max: 0,
-    hours: '10:00–19:00, выходной — понедельник',
-    address: 'ул. Республики, 60',
+    price_max: 500,
+    hours: '11:00–19:00',
+    address: 'ул. Орджоникидзе, 59',
     lat: 57.150500,
     lng: 65.544865,
     tips: JSON.stringify([
-      'Читальный зал на 2 этаже — тихий и просторный',
-      'Бесплатный Wi-Fi и розетки у каждого стола',
-      'Нужен паспорт для первого посещения'
+      'Приятная и тихая атмосфера',
+      'Проводятся интересные экскурсии',
+      'Можно взять нужные для учебы книги'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/natsionalnaya_biblioteka_tiumenskoi_oblasti/1339764958/?ll=65.568900%2C57.151200&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D0%B1%D0%B8%D0%B1%D0%BB%D0%B8%D0%BE%D1%82%D0%B5%D0%BA%D0%B0%20%D0%BC%D0%B5%D0%BD%D0%B4%D0%B5%D0%BB%D0%B5%D0%B5%D0%B2%D0%B0/firm/1830115629708503?m=65.543748%2C57.150232%2F18'
     }),
     verified: true
   },
-  {
-    id: 'study-2',
-    category: 'study',
-    name: 'Коворкинг «Точка кипения» (ТюмГУ)',
-    description: 'Современный коворкинг для студентов и стартапов',
-    price_min: 0,
-    price_max: 0,
-    hours: '9:00–21:00',
-    address: 'ул. Семакова, 10 (корпус ТюмГУ)',
-    lat: 57.159375,
-    lng: 65.531265,
-    tips: JSON.stringify([
-      'Бесплатно для студентов ТюмГУ',
-      'Переговорные можно бронировать онлайн',
-      'Регулярно проводят бесплатные мастер-классы'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/house/ulitsa_semakova_10/Z04YcQFjS0MCQFtvfXR0dnVhZA==/?ll=65.567309%2C57.145601&z=17'
-    }),
-    verified: true
-  },
-  {
-    id: 'study-3',
-    category: 'study',
-    name: 'Кафе «Читай-Город»',
-    description: 'Кафе в книжном магазине — тихо и с розетками',
-    price_min: 100,
-    price_max: 300,
-    hours: '10:00–22:00',
-    address: 'ул. Республики, 73',
-    lat: 57.147316,
-    lng: 65.553228,
-    tips: JSON.stringify([
-      'Можно сидеть час без чувства вины',
-      'Бесплатный Wi-Fi и розетки',
-      'Чай 90₽, пирожное 130₽'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.569200%2C57.151800&z=17'
-    }),
-    verified: true
-  },
-  {
-    id: 'study-4',
-    category: 'study',
-    name: 'Библиотека ТИУ',
-    description: 'Университетская библиотека с современными залами',
-    price_min: 0,
-    price_max: 0,
-    hours: '9:00–18:00',
-    address: 'ул. Володарского, 38',
-    lat: 57.152506,
-    lng: 65.544658,
-    tips: JSON.stringify([
-      'Электронный каталог доступен онлайн',
-      'Можно бронировать книги через личный кабинет',
-      'Тихий зал на 3 этаже — идеально для подготовки'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/house/volodarskogo_ulitsa_38/Z04YcQFjSEECQFtvfXR0cHRsZA==/?ll=65.570500%2C57.147800&z=17'
-    }),
-    verified: true
-  },
+
+
   {
     id: 'print-1',
     category: 'print',
-    name: 'Типография «Печать+»',
-    description: 'Печать курсовых, дипломов, плакатов со скидкой',
-    price_min: 5,
+    name: 'Типография "Скрепка"',
+    description: 'Печать курсовых, дипломов, плакатов',
+    price_min: 0,
     price_max: 500,
-    hours: '9:00–19:00',
-    address: 'ул. Республики, 45',
-    lat: 57.153961,
-    lng: 65.539143,
-    discount: '15% по студаку',
+    hours: '9:00–18:00',
+    address: 'ул. Мельникайте, 80',
+    lat: 57.142067,
+    lng: 65.575293,
     tips: JSON.stringify([
-      'Курсовая 50 страниц = 350₽ со скидкой',
-      'Диплом в твёрдом переплёте — 1200₽',
-      'Срочный заказ (+50%) готов за 2 часа'
+      'Быстрая печать курсовых/дипломов',
+      'Большой ассортимент канцтоваров для учебы'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.568500%2C57.150500&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%81%D0%BA%D1%80%D0%B5%D0%BF%D0%BA%D0%B0/firm/1830115630090310/65.575652%2C57.142139?m=65.575774%2C57.14205%2F18'
     }),
     verified: true
   },
   {
     id: 'print-2',
     category: 'print',
-    name: 'Почта России',
-    description: 'Распечатка, сканирование, копирование',
-    price_min: 5,
-    price_max: 200,
-    hours: '9:00–20:00',
-    address: 'ул. Ленина, 25',
-    lat: 57.158164,
-    lng: 65.527249,
+    name: 'Типография "Скрепка"',
+    description: 'Печать курсовых, дипломов, плакатов',
+    price_min: 0,
+    price_max: 500,
+    hours: '9:00–18:00',
+    address: 'ул. 50 лет Октября, 36',
+    lat: 57.14708,
+    lng: 65.577397,
     tips: JSON.stringify([
-      'Можно оплатить картой',
-      'Скан документов — 10₽ за страницу',
-      'Менее загружена после 17:00'
+      'Быстрая печать курсовых/дипломов',
+      'Большой ассортимент канцтоваров для учебы'
     ]),
     links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/org/pochta_rossii/1075840733/?ll=65.563000%2C57.148000&z=17'
+      map: 'https://2gis.ru/tyumen/search/%D1%81%D0%BA%D1%80%D0%B5%D0%BF%D0%BA%D0%B0/firm/70000001042766697?m=65.577531%2C57.142612%2F14.72'
     }),
     verified: true
   },
-  {
-    id: 'print-3',
-    category: 'print',
-    name: 'Копировальный центр «Фото-Плюс»',
-    description: 'Фотопечать, постеры, ламинирование',
-    price_min: 10,
-    price_max: 1000,
-    hours: '10:00–20:00',
-    address: 'ул. Семакова, 12',
-    lat: 57.159375,
-    lng: 65.531265,
-    discount: '10% с 9:00 до 12:00',
-    tips: JSON.stringify([
-      'Фото 10х15 — 15₽',
-      'Ламинирование А4 — 50₽',
-      'Можно заказать онлайн с доставкой'
-    ]),
-    links: JSON.stringify({
-      map: 'https://yandex.ru/maps/59/tiumen/?ll=65.567500%2C57.145700&z=17'
-    }),
-    verified: true
-  },
+
 ];
 
 async function initDatabase() {
