@@ -4,10 +4,10 @@
   "description": "Student map of Tyumen",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js",
-    "init-db": "node init-db.js",
-    "reset-db": "node reset-db.js"
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "init-db": "node database/init.js",
+    "reset-db": "node database/init.js --reset"
   },
   "dependencies": {
     "cors": "^2.8.5",

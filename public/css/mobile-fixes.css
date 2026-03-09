@@ -1,0 +1,156 @@
+  /* Mobile Bottom Bar (Search) */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: white;
+    padding: 12px 16px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+    border-top: 1px solid #f1f5f9;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* When results are shown, move search bar to top of results, not hide it */
+  .bottom-bar.results-open {
+    transform: translateY(0); /* Don't hide */
+    z-index: 1002; /* Above results panel */
+    box-shadow: none;
+    border-top: none;
+    padding-bottom: 12px; /* Standard padding */
+  }
+
+  /* Results Panel (Sheet) */
+  .results-panel {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001; /* Below search bar */
+    background: #f8fafc; /* Slight gray background */
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+    transform: translateY(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 80px; /* Space for search bar */
+  }
+
+  .results-panel.visible {
+    transform: translateY(0);
+  }
+
+  /* Improved Results List Styling */
+  .result-item {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 16px; /* Slightly less padding to fit better */
+    background: white;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+  }
+  
+  .result-item:active {
+    background: #f8fafc;
+  }
+  
+  .result-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-right: 14px;
+    flex-shrink: 0;
+    color: white;
+  }
+  
+  .result-info {
+    flex: 1;
+    min-width: 0; /* Enable truncation */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 10px;
+  }
+  
+  .result-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .result-address {
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .result-meta {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    background: #f1f5f9;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+
+  /* Mobile Top Bar (Categories) */
+  .top-bar {
+    /* ... existing styles ... */
+    padding: 12px 16px; /* More padding */
+  }
+
+  .filter-scroll {
+    display: flex;
+    flex-wrap: nowrap; /* No wrapping, keep in one line */
+    justify-content: space-between; /* Distribute space */
+    gap: 4px; /* Small gap */
+    padding: 0; 
+    overflow: hidden; /* Hide overflow */
+    width: 100%;
+  }
+  
+  .filter-scroll::after { content: none; } 
+
+  .filter-btn-mobile {
+    flex: 1; /* Equal width */
+    min-width: 0; /* Allow shrinking */
+    padding: 6px 2px; /* Tight padding */
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: #64748b;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 56px; /* Fixed height */
+  }
+
+  .filter-icon { font-size: 18px; margin-bottom: 2px; }
+  .filter-label { 
+    font-size: 10px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    max-width: 100%;
+  }
+

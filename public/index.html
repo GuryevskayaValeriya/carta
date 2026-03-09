@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>STUDENTMAP Тюмень — Места для студентов</title>
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/mobile-fixes.css">
+</head>
+<body>
+  
+  <!-- DESKTOP HEADER -->
+  <header class="header desktop-only">
+    <div class="header-content">
+      <div class="header-left">
+        <h1 class="logo">🎓 STUDENTMAP</h1>
+      </div>
+    </div>
+  </header>
+
+  <!-- MOBILE HEADER (Filters) -->
+  <div class="top-bar mobile-only">
+    <div class="filter-scroll">
+      <button class="filter-btn-mobile active" data-category="all">
+        <span class="filter-icon">💰</span>
+        <span class="filter-label">Все</span>
+      </button>
+      <button class="filter-btn-mobile" data-category="food">
+        <span class="filter-icon">🍜</span>
+        <span class="filter-label">Еда</span>
+      </button>
+      <button class="filter-btn-mobile" data-category="fun">
+        <span class="filter-icon">🎉</span>
+        <span class="filter-label">Досуг</span>
+      </button>
+      <button class="filter-btn-mobile" data-category="study">
+        <span class="filter-icon">📚</span>
+        <span class="filter-label">Учёба</span>
+      </button>
+      <button class="filter-btn-mobile" data-category="print">
+        <span class="filter-icon">🖨️</span>
+        <span class="filter-label">Печать</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-wrapper">
+    <!-- SIDEBAR (Desktop) -->
+    <aside class="sidebar desktop-only">
+      <!-- Desktop Search (Moved here) -->
+      <div class="sidebar-search">
+        <div class="search-box">
+          <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+          </svg>
+          <input type="text" id="desktopSearchInput" placeholder="Найти место..." class="search-input">
+          <button class="clear-search-btn hidden" id="desktopClearBtn">✕</button>
+        </div>
+      </div>
+
+      <!-- Desktop Filters -->
+      <div class="sidebar-filters">
+        <button class="filter-btn active all" data-category="all">Все</button>
+        <button class="filter-btn food" data-category="food">Еда</button>
+        <button class="filter-btn fun" data-category="fun">Досуг</button>
+        <button class="filter-btn study" data-category="study">Учёба</button>
+        <button class="filter-btn print" data-category="print">Печать</button>
+      </div>
+
+      <div class="sidebar-content">
+        <h2 class="sidebar-title">📍 Места</h2>
+        <div id="placesContainer">
+          <!-- Places list for desktop -->
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAP (Shared) -->
+    <section class="map-fullscreen">
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <!-- MOBILE BOTTOM BAR (Search) -->
+  <div class="bottom-bar mobile-only">
+    <div class="search-container">
+      <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+      </svg>
+      <input type="text" id="mobileSearchInput" placeholder="Найти место..." class="search-input">
+      <button class="clear-search-btn hidden" id="mobileClearBtn">✕</button>
+    </div>
+  </div>
+
+  <!-- MOBILE RESULTS SHEET -->
+  <div class="results-panel mobile-only" id="mobileResultsPanel">
+    <div class="results-header">
+      <span class="results-title">📍 Найдено мест</span>
+      <span class="results-count" id="mobileResultsCount">0</span>
+    </div>
+    <div class="results-list" id="mobileResultsList">
+      <!-- Results for mobile -->
+    </div>
+  </div>
+
+  <!-- MOBILE MODAL -->
+  <div class="place-modal mobile-only" id="placeModal">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Content here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
