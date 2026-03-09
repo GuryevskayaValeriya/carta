@@ -22,8 +22,8 @@
    | **Branch** | `main` (или твоя основная ветка) |
    | **Root Directory** | (оставь пустым) |
    | **Runtime** | `Node` |
-   | **Build Command** | `npm install && npm run init-db` |
-   | **Start Command** | `node server.js` |
+   | **Build Command** | `npm install` |
+   | **Start Command** | `npm start` |
    | **Instance Type** | `Free` |
 
 4. В разделе **Environment Variables** добавь переменную:
