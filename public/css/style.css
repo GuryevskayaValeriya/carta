@@ -321,143 +321,12 @@ body {
     height: 100dvh;
   }
 
-  /* Mobile Top Bar */
-  .top-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.95); /* White background for mobile too */
-    backdrop-filter: blur(10px);
-    padding: 10px 0;
-    padding-top: max(10px, env(safe-area-inset-top));
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  }
-
-  .filter-scroll {
-    display: flex;
-    overflow-x: auto;
-    gap: 12px;
-    padding: 0 16px 4px; /* Side padding */
-    -webkit-overflow-scrolling: touch;
-    /* Center items if they fit, otherwise start */
-    /* justify-content: center; - often problematic with scroll, better use margins */
-  }
-  
-  /* Make first and last item have margin to feel centered/padded */
-  .filter-scroll::after {
-    content: '';
-    flex: 0 0 4px;
-  }
-
-  .filter-scroll::-webkit-scrollbar {
-    display: none;
-  }
-
-  .filter-btn-mobile {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-width: 64px;
-    padding: 8px 4px;
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    color: #64748b;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-  }
-
-  .filter-btn-mobile.active {
-    background: #1e293b; /* Dark active state for mobile "modern" look? or keep colorful */
-    color: white;
-    border-color: #1e293b;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(30, 41, 59, 0.2);
-  }
-  
-  /* Or use colorful active states for mobile too */
-  .filter-btn-mobile[data-category="food"].active { background: #fbbf24; border-color: #fbbf24; }
-  .filter-btn-mobile[data-category="fun"].active { background: #8b5cf6; border-color: #8b5cf6; }
-  .filter-btn-mobile[data-category="study"].active { background: #34d399; border-color: #34d399; }
-  .filter-btn-mobile[data-category="print"].active { background: #3b82f6; border-color: #3b82f6; }
-
-  .filter-icon { font-size: 20px; margin-bottom: 4px; }
-  .filter-label { font-size: 11px; font-weight: 600; }
-
-  /* Mobile Bottom Bar */
-  .bottom-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: white;
-    padding: 12px 16px;
-    padding-bottom: max(12px, env(safe-area-inset-bottom));
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
-    border-top: 1px solid #f1f5f9;
-    transition: transform 0.3s ease;
-  }
-  
-  .bottom-bar.hidden {
-      transform: translateY(100%);
-  }
-  
-  .bottom-bar .search-container {
-    display: flex;
-    align-items: center;
-    position: relative;
-    width: 100%;
-  }
-
-  .bottom-bar .search-input {
-    background: #f1f5f9;
-    border: none;
-    border-radius: 20px;
-    padding: 14px 14px 14px 44px; /* More padding for icon */
-    font-size: 16px; /* Prevents zoom on iOS */
-    height: 50px; /* Explicit height */
-  }
-
-  .bottom-bar .search-icon {
-    top: 50%;
-    transform: translateY(-50%);
-    left: 16px;
-    width: 20px;
-    height: 20px;
-    color: #64748b;
-  }
-
-  /* Results Panel (Sheet) */
-  .results-panel {
-    background: white;
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.1);
-  }
-
-  .results-header {
-    background: white;
-    border-bottom: 1px solid #f1f5f9;
-    padding: 20px;
-  }
-  
-  .results-title { font-size: 1.1rem; }
-
-  .result-item {
-    padding: 16px 20px;
-    border-bottom: 1px solid #f8fafc;
-  }
-  
-  .result-name { font-size: 1rem; }
+  /* Mobile Top Bar, Filter buttons, Results Panel - styles moved to mobile-fixes.css */
 
   /* Modal */
   .modal-content {
     border-radius: 32px 32px 0 0;
-    padding: 32px 24px 40px; /* More bottom padding */
+    padding: 32px 24px 40px;
     box-shadow: 0 -10px 40px rgba(0,0,0,0.2);
   }
 
@@ -476,7 +345,7 @@ body {
   }
 
   .modal-place-name { font-size: 1.6rem; margin-bottom: 10px; }
-  
+
   .modal-info-row {
     background: #f8fafc;
     padding: 12px;
@@ -484,6 +353,6 @@ body {
     margin-bottom: 8px;
     align-items: center;
   }
-  
+
   .modal-info-icon { font-size: 20px; margin-right: 8px; }
 }

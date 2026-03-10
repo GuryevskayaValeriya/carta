@@ -28,8 +28,31 @@
     </div>
   </header>
 
-  <!-- MOBILE HEADER (Filters) -->
+  <!-- MOBILE HEADER (Search) -->
   <div class="top-bar mobile-only">
+    <!-- Mobile Search -->
+    <div class="mobile-search-container">
+      <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
+      </svg>
+      <input type="text" id="mobileSearchInput" placeholder="Найти место..." class="search-input">
+      <button class="clear-search-btn hidden" id="mobileClearBtn">✕</button>
+    </div>
+  </div>
+
+  <!-- MOBILE RESULTS DROPDOWN (appears under search) -->
+  <div class="results-dropdown mobile-only" id="resultsDropdown">
+    <div class="results-dropdown-header">
+      <span class="results-dropdown-title">📍 Найдено мест</span>
+      <span class="results-dropdown-count" id="mobileResultsCount">0</span>
+    </div>
+    <div class="results-dropdown-list" id="mobileResultsList">
+      <!-- Results for mobile -->
+    </div>
+  </div>
+
+  <!-- MOBILE BOTTOM BAR (Categories) -->
+  <div class="bottom-categories mobile-only">
     <div class="filter-scroll">
       <button class="filter-btn-mobile active" data-category="all">
         <span class="filter-icon">💰</span>
@@ -91,28 +114,6 @@
       <div id="map"></div>
     </section>
   </main>
-
-  <!-- MOBILE BOTTOM BAR (Search) -->
-  <div class="bottom-bar mobile-only">
-    <div class="search-container">
-      <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
-      </svg>
-      <input type="text" id="mobileSearchInput" placeholder="Найти место..." class="search-input">
-      <button class="clear-search-btn hidden" id="mobileClearBtn">✕</button>
-    </div>
-  </div>
-
-  <!-- MOBILE RESULTS SHEET -->
-  <div class="results-panel mobile-only" id="mobileResultsPanel">
-    <div class="results-header">
-      <span class="results-title">📍 Найдено мест</span>
-      <span class="results-count" id="mobileResultsCount">0</span>
-    </div>
-    <div class="results-list" id="mobileResultsList">
-      <!-- Results for mobile -->
-    </div>
-  </div>
 
   <!-- MOBILE MODAL -->
   <div class="place-modal mobile-only" id="placeModal">

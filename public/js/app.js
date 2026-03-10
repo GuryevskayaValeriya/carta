@@ -15,7 +15,7 @@ let currentSearch = '';
 // ===== DOM ELEMENTS =====
 const elements = {
   placesContainer: document.getElementById('placesContainer'),
-  mobileResultsPanel: document.getElementById('mobileResultsPanel'),
+  resultsDropdown: document.getElementById('resultsDropdown'),
   mobileResultsList: document.getElementById('mobileResultsList'),
   mobileResultsCount: document.getElementById('mobileResultsCount'),
   mobileSearchInput: document.getElementById('mobileSearchInput'),
@@ -25,8 +25,7 @@ const elements = {
   placeModal: document.getElementById('placeModal'),
   modalBackdrop: document.getElementById('modalBackdrop'),
   modalClose: document.getElementById('modalClose'),
-  modalBody: document.getElementById('modalBody'),
-  bottomBar: document.querySelector('.bottom-bar')
+  modalBody: document.getElementById('modalBody')
 };
 
 // ===== CATEGORIES CONFIG =====
@@ -98,45 +97,6 @@ function setupEventListeners() {
     });
   });
 
-  // Mobile Swipe to Close (Simple implementation)
-  if (elements.mobileResultsPanel) {
-    let startY = 0;
-    
-    elements.mobileResultsPanel.addEventListener('touchstart', (e) => {
-        // Only if we are at the top of the scroll or it's the header
-        if (elements.mobileResultsList.scrollTop === 0) {
-            startY = e.touches[0].clientY;
-        } else {
-            startY = -1; // Ignore
-        }
-    }, { passive: true });
-
-    elements.mobileResultsPanel.addEventListener('touchmove', (e) => {
-        if (startY === -1) return;
-        const currentY = e.touches[0].clientY;
-        const diff = currentY - startY;
-        
-        // If pulling down significantly
-        if (diff > 50) {
-             // Visual feedback could be added here (transform)
-        }
-    }, { passive: true });
-
-    elements.mobileResultsPanel.addEventListener('touchend', (e) => {
-        if (startY === -1) return;
-        const currentY = e.changedTouches[0].clientY;
-        const diff = currentY - startY;
-        
-        if (diff > 100) { // Threshold to close
-            showMobileResults(false);
-            if (elements.mobileSearchInput) {
-                elements.mobileSearchInput.value = ''; // Optional: clear search on swipe down? Maybe just close
-                elements.mobileSearchInput.blur();
-            }
-        }
-    }, { passive: true });
-  }
-
   // Search Inputs
   if (elements.desktopSearchInput) {
     elements.desktopSearchInput.addEventListener('input', (e) => setSearch(e.target.value));
@@ -144,8 +104,7 @@ function setupEventListeners() {
   if (elements.mobileSearchInput) {
     elements.mobileSearchInput.addEventListener('input', (e) => setSearch(e.target.value));
     elements.mobileSearchInput.addEventListener('focus', () => {
-       // Maybe expand results panel on focus?
-       if (filteredPlaces.length > 0) showMobileResults(true);
+      showMobileResults(true);
     });
   }
 
@@ -166,6 +125,17 @@ function setupEventListeners() {
   // Modal Actions
   if (elements.modalClose) elements.modalClose.addEventListener('click', closeModal);
   if (elements.modalBackdrop) elements.modalBackdrop.addEventListener('click', closeModal);
+
+  // Close dropdown on click outside
+  document.addEventListener('click', (e) => {
+    if (elements.resultsDropdown && elements.mobileSearchInput) {
+      if (!elements.resultsDropdown.contains(e.target) && !elements.mobileSearchInput.contains(e.target)) {
+        if (elements.resultsDropdown.classList.contains('visible')) {
+          showMobileResults(false);
+        }
+      }
+    }
+  });
 }
 
 // ===== LOGIC =====
@@ -343,11 +313,11 @@ function renderSidebar() {
 
 function renderMobileResults() {
   if (!elements.mobileResultsList) return;
-  
+
   elements.mobileResultsList.innerHTML = '';
   elements.mobileResultsCount.textContent = filteredPlaces.length;
 
-  // Show panel if searching, but NOT just if category selected (as requested)
+  // Show dropdown if searching
   const shouldShow = currentSearch.length > 0;
   showMobileResults(shouldShow);
 
@@ -368,7 +338,7 @@ function renderMobileResults() {
       </div>
       <div class="result-meta">${formatPrice(place.price)}</div>
     `;
-    
+
     item.addEventListener('click', () => {
       onPlaceSelect(place);
     });
@@ -408,18 +378,15 @@ function formatPrice(price) {
 }
 
 function showMobileResults(visible) {
-  if (!elements.mobileResultsPanel) return;
-  
+  if (!elements.resultsDropdown) return;
+
   // Check if we are actually on mobile (or small screen)
-  if (window.innerWidth > 768) return; 
+  if (window.innerWidth > 768) return;
 
   if (visible) {
-    elements.mobileResultsPanel.classList.add('visible');
-    // Don't hide bottom bar, but change its style if needed or move it
-    if (elements.bottomBar) elements.bottomBar.classList.add('results-open');
+    elements.resultsDropdown.classList.add('visible');
   } else {
-    elements.mobileResultsPanel.classList.remove('visible');
-    if (elements.bottomBar) elements.bottomBar.classList.remove('results-open');
+    elements.resultsDropdown.classList.remove('visible');
   }
 }
 
