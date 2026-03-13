@@ -7,6 +7,10 @@ let filteredPlaces = [];
 let map = null;
 let markers = [];
 let activeMarker = null;
+let userLocationMarker = null;
+let userLocationAccuracyCircle = null;
+let userLocationCoordinates = null;
+let routeLayer = null;
 
 // Filter State
 let currentCategory = 'all';
@@ -58,6 +62,8 @@ function initMap() {
   // Add zoom control to top-right for desktop, hidden on mobile usually? 
   // Let's just add it standard, it's fine.
   L.control.zoom({ position: 'topright' }).addTo(map);
+  addGeolocationControl();
+  map.on('popupopen', onPopupOpen);
 
   // Close mobile results when clicking on map
   map.on('click', () => {
@@ -67,6 +73,199 @@ function initMap() {
       if (elements.mobileSearchInput) elements.mobileSearchInput.blur();
     }
   });
+}
+
+function addGeolocationControl() {
+  const GeolocationControl = L.Control.extend({
+    options: {
+      position: 'bottomright'
+    },
+    onAdd() {
+      const container = L.DomUtil.create('div', 'leaflet-bar geolocation-control');
+      const button = L.DomUtil.create('button', 'geolocation-btn', container);
+      button.type = 'button';
+      button.setAttribute('aria-label', 'Определить моё местоположение');
+      button.setAttribute('title', 'Моё местоположение');
+      button.innerHTML = `
+        <span class="geolocation-btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M12 2.5L14.85 9.15L21.5 12L14.85 14.85L12 21.5L9.15 14.85L2.5 12L9.15 9.15L12 2.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+            <circle cx="12" cy="12" r="2.1" fill="currentColor"/>
+          </svg>
+        </span>
+      `;
+
+      L.DomEvent.disableClickPropagation(container);
+      L.DomEvent.on(button, 'click', () => centerOnUserLocation(button));
+
+      return container;
+    }
+  });
+
+  map.addControl(new GeolocationControl());
+}
+
+async function centerOnUserLocation(button) {
+  button.disabled = true;
+  button.classList.add('locating');
+  try {
+    const position = await requestUserLocation();
+    updateUserLocation(position);
+    map.setView(userLocationCoordinates, 16);
+  } catch (error) {
+    showUserLocationError(error);
+  } finally {
+    button.disabled = false;
+    button.classList.remove('locating');
+  }
+}
+
+function requestUserLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) {
+      reject({ code: -1 });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(resolve, reject, {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    });
+  });
+}
+
+function updateUserLocation(position) {
+  const userCoords = [position.coords.latitude, position.coords.longitude];
+  const accuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : 50;
+  userLocationCoordinates = userCoords;
+
+  if (userLocationMarker) {
+    map.removeLayer(userLocationMarker);
+  }
+  if (userLocationAccuracyCircle) {
+    map.removeLayer(userLocationAccuracyCircle);
+  }
+
+  const locationIcon = L.divIcon({
+    className: 'user-location-marker-wrapper',
+    html: '<div class="user-location-marker"><span class="user-location-dot"></span><span class="user-location-pulse"></span></div>',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  });
+
+  userLocationMarker = L.marker(userCoords, { icon: locationIcon }).addTo(map);
+  userLocationMarker
+    .bindTooltip('Вы здесь', {
+      permanent: true,
+      direction: 'right',
+      offset: [14, 0],
+      className: 'user-location-tooltip'
+    })
+    .openTooltip();
+
+  userLocationAccuracyCircle = L.circle(userCoords, {
+    radius: accuracy,
+    color: '#2563eb',
+    weight: 1,
+    fillColor: '#60a5fa',
+    fillOpacity: 0.18
+  }).addTo(map);
+}
+
+function showUserLocationError(error) {
+  if (error.code === -1) {
+    alert('Определение местоположения не поддерживается этим браузером.');
+    return;
+  }
+
+  if (error.code === 1) {
+    alert('Доступ к геолокации запрещён. Разрешите доступ в настройках браузера.');
+    return;
+  }
+
+  if (error.code === 2) {
+    alert('Не удалось определить местоположение. Проверьте GPS/интернет и попробуйте снова.');
+    return;
+  }
+
+  if (error.code === 3) {
+    alert('Превышено время ожидания геолокации. Попробуйте ещё раз.');
+    return;
+  }
+
+  alert('Не удалось получить местоположение.');
+}
+
+function onPopupOpen(event) {
+  const popupElement = event.popup.getElement();
+  if (!popupElement) return;
+
+  const routeButton = popupElement.querySelector('.route-to-place-btn');
+  if (!routeButton) return;
+
+  routeButton.addEventListener('click', async () => {
+    const placeId = routeButton.dataset.placeId;
+    const place = PLACES.find((item) => item.id === placeId);
+    if (!place) return;
+    await buildRouteToPlace(place, routeButton);
+  });
+}
+
+async function buildRouteToPlace(place, routeButton) {
+  routeButton.disabled = true;
+  routeButton.classList.add('loading');
+  routeButton.textContent = 'Строим...';
+
+  try {
+    const position = await requestUserLocation();
+    updateUserLocation(position);
+    const routeCoordinates = await fetchRouteCoordinates(userLocationCoordinates, place.coordinates);
+    drawRoute(routeCoordinates);
+    map.fitBounds(routeLayer.getBounds(), { padding: [48, 48] });
+  } catch (error) {
+    if (error.code) {
+      showUserLocationError(error);
+    } else {
+      alert('Не удалось построить маршрут. Попробуйте ещё раз через пару секунд.');
+    }
+  } finally {
+    routeButton.disabled = false;
+    routeButton.classList.remove('loading');
+    routeButton.textContent = '🗺️ Маршрут';
+  }
+}
+
+async function fetchRouteCoordinates(fromCoordinates, toCoordinates) {
+  const [fromLat, fromLng] = fromCoordinates;
+  const [toLat, toLng] = toCoordinates;
+  const requestUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+  const response = await fetch(requestUrl);
+
+  if (!response.ok) {
+    throw new Error('Route API request failed');
+  }
+
+  const data = await response.json();
+  const route = data.routes && data.routes[0];
+  if (!route || !route.geometry || !Array.isArray(route.geometry.coordinates)) {
+    throw new Error('Route geometry is missing');
+  }
+
+  return route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+}
+
+function drawRoute(routeCoordinates) {
+  if (routeLayer) {
+    map.removeLayer(routeLayer);
+  }
+
+  routeLayer = L.polyline(routeCoordinates, {
+    color: '#2563eb',
+    weight: 6,
+    opacity: 0.9,
+    lineJoin: 'round'
+  }).addTo(map);
 }
 
 async function loadPlaces() {
@@ -257,7 +456,7 @@ function updateMarkers() {
         ` : ''}
 
         <div style="margin-top: 12px; display: flex; gap: 8px;">
-           <a href="${place.links?.map || '#'}" target="_blank" style="flex: 1; text-align: center; background: #3b82f6; color: white; text-decoration: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s;">🗺️ Маршрут</a>
+           <button type="button" class="route-to-place-btn" data-place-id="${place.id}" style="flex: 1; text-align: center; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; cursor: pointer;">🗺️ Маршрут</button>
         </div>
       </div>
     `;

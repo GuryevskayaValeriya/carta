@@ -36,6 +36,126 @@ body {
   z-index: 1;
 }
 
+.leaflet-bottom.leaflet-right .geolocation-control {
+  margin-right: 16px;
+  margin-bottom: 18px;
+  border: none;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.22);
+}
+
+.geolocation-control .geolocation-btn {
+  width: 52px;
+  height: 52px;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.geolocation-btn .geolocation-btn-icon {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.geolocation-btn .geolocation-btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.geolocation-control .geolocation-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+  filter: brightness(1.06);
+}
+
+.geolocation-control .geolocation-btn:disabled {
+  cursor: wait;
+  filter: saturate(0.8);
+}
+
+.geolocation-control .geolocation-btn.locating .geolocation-btn-icon {
+  animation: spin-location 1s linear infinite;
+}
+
+.user-location-marker-wrapper {
+  background: transparent;
+  border: none;
+}
+
+.user-location-marker {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-location-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2563eb;
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.35);
+  z-index: 2;
+}
+
+.user-location-pulse {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.25);
+  animation: user-location-pulse 1.6s ease-out infinite;
+  z-index: 1;
+}
+
+.user-location-tooltip {
+  background: #0f172a;
+  border: none;
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.22);
+}
+
+.user-location-tooltip:before {
+  display: none;
+}
+
+.route-to-place-btn:hover {
+  filter: brightness(1.06);
+}
+
+.route-to-place-btn.loading {
+  opacity: 0.9;
+  cursor: wait !important;
+}
+
+@keyframes user-location-pulse {
+  0% { transform: scale(0.6); opacity: 0.75; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes spin-location {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* ===== DESKTOP STYLES ===== */
 
 /* Header */
@@ -319,6 +439,16 @@ body {
   .main-wrapper {
     padding-top: 0;
     height: 100dvh;
+  }
+
+  .leaflet-bottom.leaflet-right .geolocation-control {
+    margin-right: 14px;
+    margin-bottom: 96px;
+  }
+
+  .geolocation-control .geolocation-btn {
+    width: 48px;
+    height: 48px;
   }
 
   /* Mobile Top Bar, Filter buttons, Results Panel - styles moved to mobile-fixes.css */
