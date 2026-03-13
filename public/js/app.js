@@ -63,12 +63,12 @@ function initMap() {
   // Let's just add it standard, it's fine.
   L.control.zoom({ position: 'topright' }).addTo(map);
   addGeolocationControl();
-  map.on('popupopen', onPopupOpen);
 
   // Close mobile results when clicking on map
   map.on('click', () => {
     if (window.innerWidth <= 768) {
       showMobileResults(false);
+      toggleMobileCategories(true); // Show categories back when interacting with map
       // Also blur input to hide keyboard
       if (elements.mobileSearchInput) elements.mobileSearchInput.blur();
     }
@@ -197,21 +197,6 @@ function showUserLocationError(error) {
   alert('Не удалось получить местоположение.');
 }
 
-function onPopupOpen(event) {
-  const popupElement = event.popup.getElement();
-  if (!popupElement) return;
-
-  const routeButton = popupElement.querySelector('.route-to-place-btn');
-  if (!routeButton) return;
-
-  routeButton.addEventListener('click', async () => {
-    const placeId = routeButton.dataset.placeId;
-    const place = PLACES.find((item) => item.id === placeId);
-    if (!place) return;
-    await buildRouteToPlace(place, routeButton);
-  });
-}
-
 async function buildRouteToPlace(place, routeButton) {
   routeButton.disabled = true;
   routeButton.classList.add('loading');
@@ -239,7 +224,9 @@ async function buildRouteToPlace(place, routeButton) {
 async function fetchRouteCoordinates(fromCoordinates, toCoordinates) {
   const [fromLat, fromLng] = fromCoordinates;
   const [toLat, toLng] = toCoordinates;
-  const requestUrl = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`;
+  
+  // Используем наш прокси-сервер вместо прямого запроса
+  const requestUrl = `${API_BASE_URL}/route?from=${fromLng},${fromLat}&to=${toLng},${toLat}`;
   const response = await fetch(requestUrl);
 
   if (!response.ok) {
@@ -304,7 +291,10 @@ function setupEventListeners() {
     elements.mobileSearchInput.addEventListener('input', (e) => setSearch(e.target.value));
     elements.mobileSearchInput.addEventListener('focus', () => {
       showMobileResults(true);
+      toggleMobileCategories(false); // Hide categories on focus
     });
+    // Optional: Show categories back when blur/cancel? 
+    // Usually users want them back when they clear search or close dropdown.
   }
 
   // Clear Buttons
@@ -318,6 +308,7 @@ function setupEventListeners() {
     elements.mobileClearBtn.addEventListener('click', () => {
       elements.mobileSearchInput.value = '';
       setSearch('');
+      toggleMobileCategories(true); // Show categories back
     });
   }
 
@@ -427,40 +418,52 @@ function updateMarkers() {
     const marker = L.marker(place.coordinates, { icon }).addTo(map);
     
     // Create Desktop Popup Content
-    const popupContent = `
-      <div style="min-width: 260px; font-family: 'Inter', sans-serif; padding: 6px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+    const popupContent = document.createElement('div');
+    popupContent.style.minWidth = '260px';
+    popupContent.style.fontFamily = "'Inter', sans-serif";
+    popupContent.style.padding = '6px';
+
+    popupContent.innerHTML = `
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
            <div style="font-weight: 800; font-size: 18px; color: #0f172a; line-height: 1.2;">${place.name}</div>
            <div style="background: ${catConfig.color}; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-left: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">${catConfig.emoji}</div>
+      </div>
+      <div style="font-size: 14px; color: #475569; margin-bottom: 12px; display: flex; align-items: center;">
+        <span style="margin-right: 6px; font-size: 16px;">📍</span> ${place.address}
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+        <div style="font-size: 13px; font-weight: 700; color: #0f172a; background: #e2e8f0; padding: 6px 10px; border-radius: 8px; display: inline-block;">
+          💰 ${formatPrice(place.price)}
         </div>
-        <div style="font-size: 14px; color: #475569; margin-bottom: 12px; display: flex; align-items: center;">
-          <span style="margin-right: 6px; font-size: 16px;">📍</span> ${place.address}
+        <div style="font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 6px 10px; border-radius: 8px; display: inline-block; border: 1px solid #e2e8f0;">
+          🕐 ${place.hours}
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
-          <div style="font-size: 13px; font-weight: 700; color: #0f172a; background: #e2e8f0; padding: 6px 10px; border-radius: 8px; display: inline-block;">
-            💰 ${formatPrice(place.price)}
-          </div>
-          <div style="font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; padding: 6px 10px; border-radius: 8px; display: inline-block; border: 1px solid #e2e8f0;">
-            🕐 ${place.hours}
-          </div>
+      </div>
+      ${place.description ? `<div style="font-size: 13px; color: #334155; margin-top: 10px; line-height: 1.5; border-top: 2px solid #f1f5f9; padding-top: 10px;">${place.description}</div>` : ''}
+      
+      ${place.tips && place.tips.length > 0 ? `
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #f1f5f9;">
+          <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px;">💡 ИНФОРМАЦИЯ</div>
+          <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #475569;">
+            ${place.tips.map(tip => `<li style="margin-bottom: 2px;">${tip}</li>`).join('')}
+          </ul>
         </div>
-        ${place.description ? `<div style="font-size: 13px; color: #334155; margin-top: 10px; line-height: 1.5; border-top: 2px solid #f1f5f9; padding-top: 10px;">${place.description}</div>` : ''}
-        
-        ${place.tips && place.tips.length > 0 ? `
-          <div style="margin-top: 10px; padding-top: 10px; border-top: 2px solid #f1f5f9;">
-            <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px;">💡 ИНФОРМАЦИЯ</div>
-            <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #475569;">
-              ${place.tips.map(tip => `<li style="margin-bottom: 2px;">${tip}</li>`).join('')}
-            </ul>
-          </div>
-        ` : ''}
+      ` : ''}
 
-        <div style="margin-top: 12px; display: flex; gap: 8px;">
-           <button type="button" class="route-to-place-btn" data-place-id="${place.id}" style="flex: 1; text-align: center; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; cursor: pointer;">🗺️ Маршрут</button>
-        </div>
+      <div style="margin-top: 12px; display: flex; gap: 8px;">
+         <button type="button" class="route-to-place-btn" style="flex: 1; text-align: center; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; cursor: pointer;">🗺️ Маршрут</button>
       </div>
     `;
     
+    // Bind click event to the route button
+    const routeBtn = popupContent.querySelector('.route-to-place-btn');
+    if (routeBtn) {
+      routeBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Prevent map click
+        buildRouteToPlace(place, routeBtn);
+      });
+    }
+
     // Bind Popup (Leaflet handles click to open)
     marker.bindPopup(popupContent, {
         closeButton: false,
@@ -586,6 +589,27 @@ function showMobileResults(visible) {
     elements.resultsDropdown.classList.add('visible');
   } else {
     elements.resultsDropdown.classList.remove('visible');
+  }
+}
+
+function toggleMobileCategories(visible) {
+  const bottomCategories = document.querySelector('.bottom-categories');
+  const geolocationControl = document.querySelector('.geolocation-control');
+  
+  if (bottomCategories) {
+    if (visible) {
+      bottomCategories.classList.remove('hidden');
+    } else {
+      bottomCategories.classList.add('hidden');
+    }
+  }
+
+  if (geolocationControl && window.innerWidth <= 768) {
+    if (visible) {
+      geolocationControl.classList.remove('hidden');
+    } else {
+      geolocationControl.classList.add('hidden');
+    }
   }
 }
 

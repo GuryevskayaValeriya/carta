@@ -90,6 +90,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .results-dropdown.visible {
@@ -127,6 +129,22 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   max-height: calc(50vh - 60px);
+  position: relative; /* For gradient overlay context */
+}
+
+/* Gradient fade at the bottom of the list */
+.results-dropdown::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+  pointer-events: none; /* Allow clicking through */
+  border-bottom-left-radius: 16px; /* Match container radius if any */
+  border-bottom-right-radius: 16px;
+  z-index: 10;
 }
 
 /* Result Items */
@@ -213,6 +231,13 @@
   box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
   padding: 10px 16px;
   padding-bottom: max(10px, env(safe-area-inset-bottom));
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bottom-categories.hidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .filter-scroll {
