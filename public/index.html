@@ -101,7 +101,22 @@
         <button class="filter-btn print" data-category="print">Печать</button>
       </div>
 
-      <div class="sidebar-content">
+      <!-- Desktop Route Panel (hidden by default) -->
+      <div class="sidebar-route-panel" id="sidebarRoutePanel" style="display: none;">
+        <button class="sidebar-route-back" id="sidebarRouteBack">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          К списку мест
+        </button>
+        <div class="sidebar-route-header">
+          <span class="sidebar-route-icon">📍</span>
+          <span class="sidebar-route-name" id="sidebarRouteName">Название</span>
+        </div>
+        <div class="sidebar-route-transports" id="sidebarRouteTransports"></div>
+      </div>
+
+      <div class="sidebar-content" id="sidebarContent">
         <h2 class="sidebar-title">📍 Места</h2>
         <div id="placesContainer">
           <!-- Places list for desktop -->
@@ -124,6 +139,34 @@
       </div>
       <div class="modal-body" id="modalBody">
         <!-- Content here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTE MODAL -->
+  <div class="route-modal" id="routeModal">
+    <div class="route-modal-content">
+      <button class="route-modal-back-btn" id="routeModalBack">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Назад
+      </button>
+      <button class="route-modal-close" id="routeModalClose">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      
+      <div class="route-modal-header">
+        <div class="route-destination">
+          <span class="route-destination-icon">📍</span>
+          <span class="route-destination-name" id="routeDestinationName">Название места</span>
+        </div>
+      </div>
+
+      <div class="route-transports" id="routeTransports">
+        <!-- Transport options will be rendered here -->
       </div>
     </div>
   </div>

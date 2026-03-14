@@ -8,13 +8,15 @@ let map = null;
 let markers = [];
 let activeMarker = null;
 let userLocationMarker = null;
-let userLocationAccuracyCircle = null;
 let userLocationCoordinates = null;
 let routeLayer = null;
 
 // Filter State
 let currentCategory = 'all';
 let currentSearch = '';
+
+// Route State
+let currentRouteProfile = 'foot';
 
 // ===== DOM ELEMENTS =====
 const elements = {
@@ -29,7 +31,18 @@ const elements = {
   placeModal: document.getElementById('placeModal'),
   modalBackdrop: document.getElementById('modalBackdrop'),
   modalClose: document.getElementById('modalClose'),
-  modalBody: document.getElementById('modalBody')
+  modalBody: document.getElementById('modalBody'),
+  routeModal: document.getElementById('routeModal'),
+  routeModalClose: document.getElementById('routeModalClose'),
+  routeModalBack: document.getElementById('routeModalBack'),
+  routeDestinationName: document.getElementById('routeDestinationName'),
+  routeTransports: document.getElementById('routeTransports'),
+  sidebarRoutePanel: document.getElementById('sidebarRoutePanel'),
+  sidebarRouteBack: document.getElementById('sidebarRouteBack'),
+  sidebarRouteName: document.getElementById('sidebarRouteName'),
+  sidebarRouteTransports: document.getElementById('sidebarRouteTransports'),
+  sidebarContent: document.getElementById('sidebarContent'),
+  sidebarFilters: document.querySelector('.sidebar-filters')
 };
 
 // ===== CATEGORIES CONFIG =====
@@ -137,14 +150,10 @@ function requestUserLocation() {
 
 function updateUserLocation(position) {
   const userCoords = [position.coords.latitude, position.coords.longitude];
-  const accuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : 50;
   userLocationCoordinates = userCoords;
 
   if (userLocationMarker) {
     map.removeLayer(userLocationMarker);
-  }
-  if (userLocationAccuracyCircle) {
-    map.removeLayer(userLocationAccuracyCircle);
   }
 
   const locationIcon = L.divIcon({
@@ -163,14 +172,6 @@ function updateUserLocation(position) {
       className: 'user-location-tooltip'
     })
     .openTooltip();
-
-  userLocationAccuracyCircle = L.circle(userCoords, {
-    radius: accuracy,
-    color: '#2563eb',
-    weight: 1,
-    fillColor: '#60a5fa',
-    fillOpacity: 0.18
-  }).addTo(map);
 }
 
 function showUserLocationError(error) {
@@ -197,17 +198,251 @@ function showUserLocationError(error) {
   alert('Не удалось получить местоположение.');
 }
 
-async function buildRouteToPlace(place, routeButton) {
+function calculateDistance(from, to) {
+  const R = 6371e3;
+  const φ1 = from[0] * Math.PI / 180;
+  const φ2 = to[0] * Math.PI / 180;
+  const Δφ = (to[0] - from[0]) * Math.PI / 180;
+  const Δλ = (to[1] - from[1]) * Math.PI / 180;
+
+  const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+            Math.cos(φ1) * Math.cos(φ2) *
+            Math.sin(Δλ/2) * Math.sin(Δλ/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+function getOptimalProfile(distance) {
+  return distance < 2000 ? 'foot' : 'driving';
+}
+
+// Route modal state
+let routeModalPlace = null;
+let routeResults = {};
+
+async function openRouteModal(place) {
+  routeModalPlace = place;
+  routeResults = {};
+  currentRouteProfile = 'foot';
+  
+  elements.routeDestinationName.textContent = place.name;
+  if (elements.sidebarRouteName) elements.sidebarRouteName.textContent = place.name;
+  
+  elements.routeTransports.innerHTML = `
+    <div class="route-transport-loading">
+      <span>Прокладываем маршрут...</span>
+    </div>
+  `;
+  if (elements.sidebarRouteTransports) {
+    elements.sidebarRouteTransports.innerHTML = `
+      <div class="route-transport-loading">
+        <span>Прокладываем маршрут...</span>
+      </div>
+    `;
+  }
+  
+  showRouteModal(true);
+  
+  try {
+    const position = await requestUserLocation();
+    updateUserLocation(position);
+    
+    const [footRoute, drivingRoute] = await Promise.allSettled([
+      fetchRouteCoordinates(userLocationCoordinates, place.coordinates, 'foot'),
+      fetchRouteCoordinates(userLocationCoordinates, place.coordinates, 'driving')
+    ]);
+    
+    routeResults = {
+      foot: footRoute.status === 'fulfilled' ? footRoute.value : null,
+      driving: drivingRoute.status === 'fulfilled' ? drivingRoute.value : null
+    };
+    
+    const distance = calculateDistance(userLocationCoordinates, place.coordinates);
+    currentRouteProfile = getOptimalProfile(distance);
+    
+    renderRouteTransports();
+    
+    if (routeResults[currentRouteProfile]) {
+      drawRoute(routeResults[currentRouteProfile].coordinates, currentRouteProfile);
+      map.fitBounds(routeLayer.getBounds(), { padding: [48, 48] });
+    }
+    
+  } catch (error) {
+    console.error('Route error:', error);
+    elements.routeTransports.innerHTML = `
+      <div class="route-transport-error">
+        <span>Не удалось построить маршрут</span>
+      </div>
+    `;
+    elements.routeModalAction.innerHTML = 'Ошибка';
+  }
+}
+
+function renderRouteTransports() {
+  const foot = routeResults.foot;
+  const driving = routeResults.driving;
+  const isMobile = window.innerWidth <= 768;
+  
+  const transportHTML = `
+    <button class="route-transport ${currentRouteProfile === 'foot' ? 'active' : ''}" data-profile="foot">
+      <span class="route-transport-icon">🚶</span>
+      <div class="route-transport-info">
+        <span class="route-transport-time">${foot ? formatTime(foot.duration) : '—'}</span>
+        <span class="route-transport-distance">${foot ? formatDistance(foot.distance) : '—'}</span>
+      </div>
+    </button>
+    <button class="route-transport ${currentRouteProfile === 'driving' ? 'active' : ''}" data-profile="driving">
+      <span class="route-transport-icon">🚗</span>
+      <div class="route-transport-info">
+        <span class="route-transport-time">${driving ? formatTime(driving.duration) : '—'}</span>
+        <span class="route-transport-distance">${driving ? formatDistance(driving.distance) : '—'}</span>
+      </div>
+    </button>
+  `;
+  
+  // Render to mobile modal
+  if (elements.routeTransports) {
+    elements.routeTransports.innerHTML = transportHTML;
+  }
+  
+  // Render to desktop sidebar
+  if (elements.sidebarRouteTransports) {
+    elements.sidebarRouteTransports.innerHTML = `
+      <button class="sidebar-route-transport ${currentRouteProfile === 'foot' ? 'active' : ''}" data-profile="foot">
+        <span class="sidebar-route-transport-icon">🚶</span>
+        <div class="sidebar-route-transport-info">
+          <span class="sidebar-route-transport-time">${foot ? formatTime(foot.duration) : '—'}</span>
+          <span class="sidebar-route-transport-distance">${foot ? formatDistance(foot.distance) : '—'}</span>
+        </div>
+      </button>
+      <button class="sidebar-route-transport ${currentRouteProfile === 'driving' ? 'active' : ''}" data-profile="driving">
+        <span class="sidebar-route-transport-icon">🚗</span>
+        <div class="sidebar-route-transport-info">
+          <span class="sidebar-route-transport-time">${driving ? formatTime(driving.duration) : '—'}</span>
+          <span class="sidebar-route-transport-distance">${driving ? formatDistance(driving.distance) : '—'}</span>
+        </div>
+      </button>
+    `;
+  }
+  
+  // Add click handlers for mobile
+  if (elements.routeTransports) {
+    elements.routeTransports.querySelectorAll('.route-transport').forEach(btn => {
+      btn.addEventListener('click', handleTransportClick);
+    });
+  }
+  
+  // Add click handlers for desktop
+  if (elements.sidebarRouteTransports) {
+    elements.sidebarRouteTransports.querySelectorAll('.sidebar-route-transport').forEach(btn => {
+      btn.addEventListener('click', handleTransportClick);
+    });
+  }
+}
+
+function handleTransportClick(e) {
+  const btn = e.currentTarget;
+  const profile = btn.dataset.profile;
+  if (profile === currentRouteProfile || !routeResults[profile]) return;
+  
+  currentRouteProfile = profile;
+  renderRouteTransports();
+  
+  if (routeModalPlace) {
+    fetchAndDrawRoute(profile);
+  }
+}
+
+async function fetchAndDrawRoute(profile) {
+  if (!routeModalPlace || !userLocationCoordinates) return;
+  
+  try {
+    const routeData = await fetchRouteCoordinates(userLocationCoordinates, routeModalPlace.coordinates, profile);
+    drawRoute(routeData.coordinates, profile);
+    map.fitBounds(routeLayer.getBounds(), { padding: [48, 48] });
+  } catch (err) {
+    console.error('Switch route error:', err);
+  }
+}
+
+function closeRouteModal() {
+  showRouteModal(false);
+  routeModalPlace = null;
+  routeResults = {};
+  
+  if (routeLayer) {
+    map.removeLayer(routeLayer);
+    routeLayer = null;
+  }
+}
+
+function showRouteModal(show) {
+  const isMobile = window.innerWidth <= 768;
+  
+  if (isMobile) {
+    if (show) {
+      elements.routeModal.classList.add('visible');
+      toggleMobileRouteUI(true);
+    } else {
+      elements.routeModal.classList.remove('visible');
+      toggleMobileRouteUI(false);
+    }
+  } else {
+    // Desktop - use sidebar
+    if (show) {
+      elements.sidebarRoutePanel.style.display = 'block';
+      elements.sidebarContent.classList.add('hidden');
+      elements.sidebarFilters.style.display = 'none';
+    } else {
+      elements.sidebarRoutePanel.style.display = 'none';
+      elements.sidebarContent.classList.remove('hidden');
+      elements.sidebarFilters.style.display = 'flex';
+    }
+  }
+}
+
+function toggleMobileRouteUI(show) {
+  const bottomCategories = document.querySelector('.bottom-categories');
+  const geolocationControl = document.querySelector('.geolocation-control');
+  
+  if (show) {
+    if (bottomCategories) bottomCategories.classList.add('route-active');
+    if (geolocationControl) geolocationControl.classList.add('route-active');
+  } else {
+    if (bottomCategories) bottomCategories.classList.remove('route-active');
+    if (geolocationControl) geolocationControl.classList.remove('route-active');
+  }
+}
+
+async function buildRouteToPlace(place, routeButton, popupContent) {
   routeButton.disabled = true;
   routeButton.classList.add('loading');
-  routeButton.textContent = 'Строим...';
+  routeButton.textContent = 'Прокладываем...';
 
   try {
     const position = await requestUserLocation();
     updateUserLocation(position);
-    const routeCoordinates = await fetchRouteCoordinates(userLocationCoordinates, place.coordinates);
-    drawRoute(routeCoordinates);
+
+    const distance = calculateDistance(userLocationCoordinates, place.coordinates);
+    const optimalProfile = getOptimalProfile(distance);
+    currentRouteProfile = optimalProfile;
+
+    const routeData = await fetchRouteCoordinates(userLocationCoordinates, place.coordinates, optimalProfile);
+    drawRoute(routeData.coordinates, optimalProfile);
     map.fitBounds(routeLayer.getBounds(), { padding: [48, 48] });
+
+    const [footRoute, drivingRoute] = await Promise.allSettled([
+      fetchRouteCoordinates(userLocationCoordinates, place.coordinates, 'foot'),
+      fetchRouteCoordinates(userLocationCoordinates, place.coordinates, 'driving')
+    ]);
+
+    const results = {
+      foot: footRoute.status === 'fulfilled' ? footRoute.value : null,
+      driving: drivingRoute.status === 'fulfilled' ? drivingRoute.value : null
+    };
+
+    renderRoutePanel(place, popupContent, results, currentRouteProfile);
+
   } catch (error) {
     if (error.code) {
       showUserLocationError(error);
@@ -217,16 +452,89 @@ async function buildRouteToPlace(place, routeButton) {
   } finally {
     routeButton.disabled = false;
     routeButton.classList.remove('loading');
-    routeButton.textContent = '🗺️ Маршрут';
+    routeButton.style.display = 'none';
   }
 }
 
-async function fetchRouteCoordinates(fromCoordinates, toCoordinates) {
+function renderRoutePanel(place, popupContent, results, activeProfile) {
+  const existingPanel = popupContent.querySelector('.route-result-panel');
+  if (existingPanel) existingPanel.remove();
+
+  const panel = document.createElement('div');
+  panel.className = 'route-result-panel';
+
+  const foot = results.foot;
+  const driving = results.driving;
+
+  panel.innerHTML = `
+    <div class="route-result-header">Маршрут построен</div>
+    <div class="route-options">
+      <button class="route-option ${activeProfile === 'foot' ? 'active' : ''}" data-profile="foot">
+        <span class="route-option-icon">🚶</span>
+        <span class="route-option-info">
+          <span class="route-option-time">${foot ? formatTime(foot.duration) : '—'}</span>
+          <span class="route-option-distance">${foot ? formatDistance(foot.distance) : '—'}</span>
+        </span>
+      </button>
+      <button class="route-option ${activeProfile === 'driving' ? 'active' : ''}" data-profile="driving">
+        <span class="route-option-icon">🚗</span>
+        <span class="route-option-info">
+          <span class="route-option-time">${driving ? formatTime(driving.duration) : '—'}</span>
+          <span class="route-option-distance">${driving ? formatDistance(driving.distance) : '—'}</span>
+        </span>
+      </button>
+    </div>
+  `;
+
+  popupContent.appendChild(panel);
+
+  panel.querySelectorAll('.route-option').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const profile = btn.dataset.profile;
+      if (profile === currentRouteProfile) return;
+
+      btn.disabled = true;
+      currentRouteProfile = profile;
+
+      panel.querySelectorAll('.route-option').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      try {
+        const routeData = await fetchRouteCoordinates(userLocationCoordinates, place.coordinates, profile);
+        drawRoute(routeData.coordinates, profile);
+        map.fitBounds(routeLayer.getBounds(), { padding: [48, 48] });
+      } catch (err) {
+        alert('Не удалось переключить маршрут');
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  });
+}
+
+function formatTime(seconds) {
+  const mins = Math.round(seconds / 60);
+  if (mins >= 60) {
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return `${h} ч ${m} мин`;
+  }
+  return `${mins} мин`;
+}
+
+function formatDistance(meters) {
+  if (meters >= 1000) {
+    return `${(meters / 1000).toFixed(1)} км`;
+  }
+  return `${Math.round(meters)} м`;
+}
+
+async function fetchRouteCoordinates(fromCoordinates, toCoordinates, profile = 'foot') {
   const [fromLat, fromLng] = fromCoordinates;
   const [toLat, toLng] = toCoordinates;
   
-  // Используем наш прокси-сервер вместо прямого запроса
-  const requestUrl = `${API_BASE_URL}/route?from=${fromLng},${fromLat}&to=${toLng},${toLat}`;
+  const requestUrl = `${API_BASE_URL}/route?from=${fromLng},${fromLat}&to=${toLng},${toLat}&profile=${profile}`;
   const response = await fetch(requestUrl);
 
   if (!response.ok) {
@@ -239,16 +547,26 @@ async function fetchRouteCoordinates(fromCoordinates, toCoordinates) {
     throw new Error('Route geometry is missing');
   }
 
-  return route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+  return {
+    coordinates: route.geometry.coordinates.map(([lng, lat]) => [lat, lng]),
+    duration: route.duration,
+    distance: route.distance
+  };
 }
 
-function drawRoute(routeCoordinates) {
+function drawRoute(routeCoordinates, profile = 'foot') {
   if (routeLayer) {
     map.removeLayer(routeLayer);
   }
 
+  const colors = {
+    driving: '#f97316',
+    foot: '#22c55e',
+    bike: '#8b5cf6'
+  };
+
   routeLayer = L.polyline(routeCoordinates, {
-    color: '#2563eb',
+    color: colors[profile] || '#2563eb',
     weight: 6,
     opacity: 0.9,
     lineJoin: 'round'
@@ -315,6 +633,11 @@ function setupEventListeners() {
   // Modal Actions
   if (elements.modalClose) elements.modalClose.addEventListener('click', closeModal);
   if (elements.modalBackdrop) elements.modalBackdrop.addEventListener('click', closeModal);
+
+  // Route Modal Actions
+  if (elements.routeModalClose) elements.routeModalClose.addEventListener('click', closeRouteModal);
+  if (elements.routeModalBack) elements.routeModalBack.addEventListener('click', closeRouteModal);
+  if (elements.sidebarRouteBack) elements.sidebarRouteBack.addEventListener('click', closeRouteModal);
 
   // Close dropdown on click outside
   document.addEventListener('click', (e) => {
@@ -450,17 +773,18 @@ function updateMarkers() {
         </div>
       ` : ''}
 
-      <div style="margin-top: 12px; display: flex; gap: 8px;">
-         <button type="button" class="route-to-place-btn" style="flex: 1; text-align: center; background: #3b82f6; color: white; border: none; padding: 8px; border-radius: 8px; font-size: 13px; font-weight: 600; transition: background 0.2s; cursor: pointer;">🗺️ Маршрут</button>
+      <div style="margin-top: 12px; border-top: 2px solid #f1f5f9; padding-top: 12px;">
+        <button type="button" class="route-build-btn">🗺️ Построить маршрут</button>
       </div>
     `;
     
-    // Bind click event to the route button
-    const routeBtn = popupContent.querySelector('.route-to-place-btn');
+    // Build route button event - open modal
+    const routeBtn = popupContent.querySelector('.route-build-btn');
     if (routeBtn) {
       routeBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent map click
-        buildRouteToPlace(place, routeBtn);
+        e.stopPropagation();
+        marker.closePopup();
+        openRouteModal(place);
       });
     }
 
@@ -577,6 +901,17 @@ function formatPrice(price) {
   if (price.min === 0 && price.max === 0) return 'Бесплатно';
   if (price.min === price.max) return `${price.min}₽`;
   return `${price.min}–${price.max}₽`;
+}
+
+function formatRouteInfo(duration, distance, profile = 'foot') {
+  const minutes = Math.round(duration / 60);
+  const km = (distance / 1000).toFixed(1).replace('.0', '');
+  const distanceStr = km < 1 ? `${Math.round(distance)} м` : `${km} км`;
+  
+  const icons = { driving: '🚗', foot: '🚶', bike: '🚴' };
+  const icon = icons[profile] || '📍';
+  
+  return `${icon} ${minutes} мин • ${distanceStr}`;
 }
 
 function showMobileResults(visible) {

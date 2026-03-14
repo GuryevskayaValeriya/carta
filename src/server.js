@@ -20,21 +20,47 @@ app.get('/api/categories', async (req, res) => {
     res.json(['food', 'fun', 'study', 'print']);
 });
 
-// Прокси для маршрутизации (OSRM)
+// Прокси для маршрутизации (GraphHopper)
 app.get('/api/route', async (req, res) => {
-  const { from, to } = req.query;
+  const { from, to, profile = 'foot' } = req.query;
   if (!from || !to) {
     return res.status(400).json({ error: 'Missing coordinates' });
   }
 
+  const validProfiles = ['driving', 'foot', 'bike'];
+  const routeProfile = validProfiles.includes(profile) ? profile : 'foot';
+  
+  const ghProfile = routeProfile === 'driving' ? 'car' : routeProfile;
+  const apiKey = process.env.GRAPHHOPPER_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: 'GraphHopper API key not configured' });
+  }
+
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${from};${to}?overview=full&geometries=geojson`;
+    const [fromLng, fromLat] = from.split(',');
+    const [toLng, toLat] = to.split(',');
+    const url = `https://graphhopper.com/api/1/route?point=${fromLat},${fromLng}&point=${toLat},${toLng}&profile=${ghProfile}&instructions=false&points_encoded=false&key=${apiKey}`;
     const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(`OSRM API error: ${response.statusText}`);
+      throw new Error(`GraphHopper API error: ${response.statusText}`);
     }
     const data = await response.json();
-    res.json(data);
+    
+    if (!data.paths || !data.paths[0]) {
+      throw new Error('No route found');
+    }
+
+    const route = data.paths[0];
+    res.json({
+      routes: [{
+        geometry: {
+          coordinates: route.points.coordinates.map(c => [c[0], c[1]])
+        },
+        duration: route.time / 1000,
+        distance: route.distance
+      }]
+    });
   } catch (error) {
     console.error('Route proxy error:', error);
     res.status(500).json({ error: 'Failed to fetch route' });
