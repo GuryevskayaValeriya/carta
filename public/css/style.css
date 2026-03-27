@@ -1051,3 +1051,338 @@ body {
   color: #64748b;
   font-size: 15px;
 }
+
+/* ===== ACCOUNT AUTH ===== */
+
+body.auth-open {
+  overflow: hidden;
+}
+
+.account-button {
+  position: fixed;
+  top: 20px;
+  left: 440px;
+  z-index: 1400;
+  width: 54px;
+  height: 54px;
+  border: none;
+  border-radius: 999px;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.26);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.account-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.3);
+}
+
+.account-button.authorized {
+  background: #15803d;
+}
+
+.account-button.search-active {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+.account-button-label {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.account-button-label svg {
+  width: 100%;
+  height: 100%;
+}
+
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.auth-modal.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.auth-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(6px);
+}
+
+.auth-panel {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(460px, calc(100% - 32px));
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 32%),
+    linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 30px 70px rgba(15, 23, 42, 0.28);
+  transform: translate(-50%, -46%);
+  transition: transform 0.25s ease;
+}
+
+.auth-modal.visible .auth-panel {
+  transform: translate(-50%, -50%);
+}
+
+.auth-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.auth-close svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-header {
+  margin-bottom: 18px;
+}
+
+.auth-kicker {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+
+.auth-title {
+  font-size: 28px;
+  line-height: 1.1;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.auth-subtitle {
+  color: #475569;
+  font-size: 14px;
+}
+
+.auth-message {
+  display: none;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-message.visible {
+  display: block;
+}
+
+.auth-message[data-state="success"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.auth-message[data-state="error"] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.auth-message[data-state="info"] {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-tab {
+  flex: 1;
+  border: 1px solid #dbe3ef;
+  background: rgba(255, 255, 255, 0.82);
+  color: #475569;
+  padding: 11px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-tab.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #ffffff;
+}
+
+.auth-view {
+  display: none;
+}
+
+.auth-view.active {
+  display: block;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.auth-field input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.9);
+  font: inherit;
+  color: #0f172a;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+
+.auth-submit,
+.auth-secondary {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.auth-submit {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.22);
+}
+
+.auth-submit.danger {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.2);
+}
+
+.auth-secondary {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.auth-submit:hover,
+.auth-secondary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.auth-submit:disabled,
+.auth-secondary:disabled,
+.auth-field input:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.auth-profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 22px 18px;
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid #dbe3ef;
+  border-radius: 22px;
+}
+
+.auth-profile-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.auth-profile-email {
+  color: #0f172a;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  word-break: break-word;
+}
+
+.auth-profile-status {
+  color: #475569;
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .account-button {
+    top: 86px;
+    left: auto;
+    right: 16px;
+    width: 50px;
+    height: 50px;
+  }
+
+  .auth-panel {
+    width: calc(100% - 20px);
+    padding: 22px 18px;
+    border-radius: 24px;
+  }
+
+  .auth-title {
+    font-size: 24px;
+  }
+}

@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const placesRoutes = require('./routes/places.routes');
+const authRoutes = require('./routes/auth.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,6 +69,7 @@ app.get('/api/route', async (req, res) => {
 });
 
 // General resource routes last
+app.use('/api/auth', authRoutes);
 app.use('/api/places', placesRoutes);
 
 // Запуск сервера

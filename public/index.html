@@ -18,6 +18,14 @@
   <link rel="stylesheet" href="css/mobile-fixes.css">
 </head>
 <body>
+  <button class="account-button" id="accountButton" type="button" aria-label="Открыть аккаунт">
+    <span class="account-button-label" id="accountButtonLabel">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M4 20C4.8 16.8 7.73333 15.2 12 15.2C16.2667 15.2 19.2 16.8 20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    </span>
+  </button>
   
   <!-- DESKTOP HEADER -->
   <header class="header desktop-only">
@@ -171,8 +179,89 @@
     </div>
   </div>
 
+  <div class="auth-modal" id="authModal">
+    <div class="auth-backdrop" id="authBackdrop"></div>
+    <div class="auth-panel">
+      <button class="auth-close" id="authClose" type="button" aria-label="Закрыть окно аккаунта">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="auth-header">
+        <div class="auth-kicker">Аккаунт StudentMap</div>
+        <h2 class="auth-title" id="authTitle">Вход в аккаунт</h2>
+        <p class="auth-subtitle" id="authSubtitle">Войдите в свой аккаунт StudentMap.</p>
+      </div>
+
+      <div class="auth-message" id="authMessage"></div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" type="button" data-auth-open-view="login">Вход</button>
+        <button class="auth-tab" type="button" data-auth-open-view="register">Регистрация</button>
+      </div>
+
+      <div class="auth-view active" data-auth-view="login">
+        <form class="auth-form" id="loginForm">
+          <label class="auth-field">
+            <span>Почта</span>
+            <input name="email" type="email" placeholder="you@example.com" required>
+          </label>
+          <label class="auth-field">
+            <span>Пароль</span>
+            <input name="password" type="password" placeholder="Минимум 8 символов" minlength="8" required>
+          </label>
+          <button class="auth-submit" type="submit">Войти</button>
+        </form>
+      </div>
+
+      <div class="auth-view" data-auth-view="register">
+        <form class="auth-form" id="registerForm">
+          <label class="auth-field">
+            <span>Почта</span>
+            <input name="email" type="email" placeholder="you@example.com" required>
+          </label>
+          <label class="auth-field">
+            <span>Пароль</span>
+            <input name="password" type="password" placeholder="Минимум 8 символов" minlength="8" required>
+          </label>
+          <label class="auth-field">
+            <span>Повторите пароль</span>
+            <input name="confirmPassword" type="password" placeholder="Повторите пароль" minlength="8" required>
+          </label>
+          <button class="auth-submit" type="submit">Создать аккаунт</button>
+        </form>
+      </div>
+
+      <div class="auth-view" data-auth-view="verify">
+        <form class="auth-form" id="verifyForm">
+          <label class="auth-field">
+            <span>Почта</span>
+            <input id="verifyEmail" name="email" type="email" placeholder="you@example.com" required>
+          </label>
+          <label class="auth-field">
+            <span>Код из письма</span>
+            <input name="code" type="text" inputmode="numeric" maxlength="6" placeholder="123456" required>
+          </label>
+          <button class="auth-submit" type="submit">Подтвердить почту</button>
+          <button class="auth-secondary" id="resendCodeButton" type="button">Отправить код ещё раз</button>
+        </form>
+      </div>
+
+      <div class="auth-view" data-auth-view="profile">
+        <div class="auth-profile-card">
+          <div class="auth-profile-icon" id="profileAvatar">A</div>
+          <div class="auth-profile-email" id="profileEmail"></div>
+          <div class="auth-profile-status" id="profileStatus"></div>
+        </div>
+        <button class="auth-submit danger" id="logoutButton" type="button">Выйти</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
