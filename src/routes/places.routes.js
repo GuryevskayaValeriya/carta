@@ -32,8 +32,7 @@ router.get('/', async (req, res) => {
       coordinates: [row.lat, row.lng],
       discount: row.discount,
       tips: row.tips ? JSON.parse(row.tips) : [],
-      links: row.links ? JSON.parse(row.links) : {},
-      verified: !!row.verified
+      links: row.links ? JSON.parse(row.links) : {}
     }));
 
     if (search) {
@@ -78,8 +77,7 @@ router.get('/:id', async (req, res) => {
       coordinates: [row.lat, row.lng],
       discount: row.discount,
       tips: row.tips ? JSON.parse(row.tips) : [],
-      links: row.links ? JSON.parse(row.links) : {},
-      verified: !!row.verified
+      links: row.links ? JSON.parse(row.links) : {}
     };
 
     res.json(place);

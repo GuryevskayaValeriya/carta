@@ -1,10 +1,9 @@
-require('dotenv').config({ path: '../.env' }); // Adjust path if running from database folder, but we will run from root usually. Let's try to be robust.
-// Actually better to assume we run from root as `node database/init.js`
 require('dotenv').config();
 
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
+const { validatePlacesData } = require('./validate-places');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -49,12 +48,21 @@ async function initDatabase() {
     // Заполнение данными
     console.log('🌱 Заполнение начальными данными...');
     const placesData = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
+    const validation = validatePlacesData(placesData);
+
+    validation.warnings.forEach((warning) => {
+      console.warn(`[places:warn] ${warning}`);
+    });
+
+    if (validation.errors.length > 0) {
+      throw new Error(`Places validation failed:\n${validation.errors.join('\n')}`);
+    }
     
     const insertQuery = `
       INSERT INTO places (
         id, category, name, description, price_min, price_max, price_unit,
-        hours, address, lat, lng, discount, tips, links, verified
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        hours, address, lat, lng, discount, tips, links
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       ON CONFLICT (id) DO UPDATE SET
         category = EXCLUDED.category,
         name = EXCLUDED.name,
@@ -68,8 +76,7 @@ async function initDatabase() {
         lng = EXCLUDED.lng,
         discount = EXCLUDED.discount,
         tips = EXCLUDED.tips,
-        links = EXCLUDED.links,
-        verified = EXCLUDED.verified;
+        links = EXCLUDED.links;
     `;
     // Added ON CONFLICT just in case, though if not reset, we skip. But if we want to update existing...
     // Actually, for "init" without reset, we usually just skip if exists.
@@ -95,8 +102,7 @@ async function initDatabase() {
         place.lng,
         place.discount || null,
         tips,
-        links,
-        place.verified
+        links
       ]);
       insertedCount++;
     }

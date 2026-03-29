@@ -12,9 +12,10 @@ CREATE TABLE IF NOT EXISTS places (
   lng REAL,
   discount TEXT,
   tips TEXT,
-  links TEXT,
-  verified BOOLEAN DEFAULT true
+  links TEXT
 );
+
+ALTER TABLE places DROP COLUMN IF EXISTS verified;
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,

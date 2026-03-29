@@ -7,7 +7,11 @@
     "start": "node src/server.js",
     "dev": "node src/server.js",
     "init-db": "node database/init.js",
-    "reset-db": "node database/init.js --reset"
+    "reset-db": "node database/init.js --reset",
+    "check:data": "node database/validate-places.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "check": "npm run check:data && npm run check:syntax",
+    "lint": "npm run check"
   },
   "dependencies": {
     "cors": "^2.8.5",

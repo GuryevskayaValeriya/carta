@@ -4,16 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>STUDENTMAP Тюмень — Места для студентов</title>
-  
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  
-  <!-- Fonts -->
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Main CSS -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/mobile-fixes.css">
 </head>
@@ -26,8 +23,7 @@
       </svg>
     </span>
   </button>
-  
-  <!-- DESKTOP HEADER -->
+
   <header class="header desktop-only">
     <div class="header-content">
       <div class="header-left">
@@ -36,9 +32,7 @@
     </div>
   </header>
 
-  <!-- MOBILE HEADER (Search) -->
   <div class="top-bar mobile-only">
-    <!-- Mobile Search -->
     <div class="mobile-search-container">
       <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/>
@@ -48,22 +42,18 @@
     </div>
   </div>
 
-  <!-- MOBILE RESULTS DROPDOWN (appears under search) -->
   <div class="results-dropdown mobile-only" id="resultsDropdown">
     <div class="results-dropdown-header">
       <span class="results-dropdown-title">📍 Найдено мест</span>
       <span class="results-dropdown-count" id="mobileResultsCount">0</span>
     </div>
-    <div class="results-dropdown-list" id="mobileResultsList">
-      <!-- Results for mobile -->
-    </div>
+    <div class="results-dropdown-list" id="mobileResultsList"></div>
   </div>
 
-  <!-- MOBILE BOTTOM BAR (Categories) -->
   <div class="bottom-categories mobile-only">
     <div class="filter-scroll">
       <button class="filter-btn-mobile active" data-category="all">
-        <span class="filter-icon">💰</span>
+        <span class="filter-icon">📍</span>
         <span class="filter-label">Все</span>
       </button>
       <button class="filter-btn-mobile" data-category="food">
@@ -85,11 +75,8 @@
     </div>
   </div>
 
-  <!-- MAIN CONTENT -->
   <main class="main-wrapper">
-    <!-- SIDEBAR (Desktop) -->
     <aside class="sidebar desktop-only">
-      <!-- Desktop Search (Moved here) -->
       <div class="sidebar-search">
         <div class="search-box">
           <svg class="search-icon" fill="currentColor" viewBox="0 0 20 20">
@@ -100,7 +87,6 @@
         </div>
       </div>
 
-      <!-- Desktop Filters -->
       <div class="sidebar-filters">
         <button class="filter-btn active all" data-category="all">Все</button>
         <button class="filter-btn food" data-category="food">Еда</button>
@@ -109,13 +95,12 @@
         <button class="filter-btn print" data-category="print">Печать</button>
       </div>
 
-      <!-- Desktop Route Panel (hidden by default) -->
-      <div class="sidebar-route-panel" id="sidebarRoutePanel" style="display: none;">
+      <div class="sidebar-route-panel" id="sidebarRoutePanel">
         <button class="sidebar-route-back" id="sidebarRouteBack">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          К списку мест
+          Назад
         </button>
         <div class="sidebar-route-header">
           <span class="sidebar-route-icon">📍</span>
@@ -124,48 +109,35 @@
         <div class="sidebar-route-transports" id="sidebarRouteTransports"></div>
       </div>
 
+      <div class="sidebar-place-panel" id="sidebarPlacePanel">
+        <button class="sidebar-route-back" id="sidebarPlaceBack">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          К списку мест
+        </button>
+        <div id="sidebarPlaceContent"></div>
+      </div>
+
       <div class="sidebar-content" id="sidebarContent">
         <h2 class="sidebar-title">📍 Места</h2>
-        <div id="placesContainer">
-          <!-- Places list for desktop -->
-        </div>
+        <div id="placesContainer"></div>
       </div>
     </aside>
 
-    <!-- MAP (Shared) -->
     <section class="map-fullscreen">
       <div id="map"></div>
     </section>
   </main>
 
-  <!-- MOBILE MODAL -->
-  <div class="place-modal mobile-only" id="placeModal">
-    <div class="modal-backdrop" id="modalBackdrop"></div>
-    <div class="modal-content">
-      <div class="modal-header">
-        <button class="modal-close" id="modalClose">✕</button>
-      </div>
-      <div class="modal-body" id="modalBody">
-        <!-- Content here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ROUTE MODAL -->
   <div class="route-modal" id="routeModal">
     <div class="route-modal-content">
-      <button class="route-modal-back-btn" id="routeModalBack">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-        Назад
-      </button>
       <button class="route-modal-close" id="routeModalClose">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
           <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
-      
+
       <div class="route-modal-header">
         <div class="route-destination">
           <span class="route-destination-icon">📍</span>
@@ -173,9 +145,20 @@
         </div>
       </div>
 
-      <div class="route-transports" id="routeTransports">
-        <!-- Transport options will be rendered here -->
-      </div>
+      <div class="route-transports" id="routeTransports"></div>
+    </div>
+  </div>
+
+  <div class="mobile-place-sheet mobile-only" id="mobilePlaceSheet">
+    <div class="mobile-place-sheet-backdrop" id="mobilePlaceBackdrop"></div>
+    <div class="mobile-place-sheet-panel">
+      <div class="mobile-place-sheet-handle"></div>
+      <button class="mobile-place-sheet-close" id="mobilePlaceClose" type="button" aria-label="Закрыть карточку места">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="mobile-place-content" id="mobilePlaceContent"></div>
     </div>
   </div>
 
@@ -259,9 +242,8 @@
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="js/app.js"></script>
+  <script type="module" src="js/app.js"></script>
   <script src="js/auth.js"></script>
 </body>
 </html>
