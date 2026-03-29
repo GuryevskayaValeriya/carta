@@ -1,4 +1,4 @@
-export function createMapController({ categoriesConfig, onMapClick, onPlaceSelect }) {
+export function createMapController({ categoriesConfig, onMapClick, onPlaceSelect, onStatusMessage }) {
   let map = null;
   let markers = [];
   let routeLayer = null;
@@ -111,28 +111,28 @@ export function createMapController({ categoriesConfig, onMapClick, onPlaceSelec
       .openTooltip();
   }
 
-  function showUserLocationError(error) {
+  function getUserLocationErrorMessage(error) {
     if (error.code === -1) {
-      alert('Определение местоположения не поддерживается этим браузером.');
-      return;
+      return 'Определение местоположения не поддерживается этим браузером.';
     }
 
     if (error.code === 1) {
-      alert('Доступ к геолокации запрещён. Разрешите доступ в настройках браузера.');
-      return;
+      return 'Доступ к геолокации запрещен. Разрешите его в браузере и попробуйте снова.';
     }
 
     if (error.code === 2) {
-      alert('Не удалось определить местоположение. Проверьте GPS/интернет и попробуйте снова.');
-      return;
+      return 'Не удалось определить местоположение. Проверьте GPS или интернет и попробуйте снова.';
     }
 
     if (error.code === 3) {
-      alert('Превышено время ожидания геолокации. Попробуйте ещё раз.');
-      return;
+      return 'Превышено время ожидания геолокации. Попробуйте еще раз.';
     }
 
-    alert('Не удалось получить местоположение.');
+    return 'Не удалось получить местоположение.';
+  }
+
+  function showUserLocationError(error) {
+    onStatusMessage?.(getUserLocationErrorMessage(error), 'error');
   }
 
   function updateMarkers(places, activePlaceId) {
@@ -188,8 +188,7 @@ export function createMapController({ categoriesConfig, onMapClick, onPlaceSelec
 
     const colors = {
       driving: '#f97316',
-      foot: '#22c55e',
-      bike: '#8b5cf6'
+      foot: '#22c55e'
     };
 
     routeLayer = L.polyline(routeCoordinates, {
@@ -223,8 +222,9 @@ export function createMapController({ categoriesConfig, onMapClick, onPlaceSelec
     clearRoute,
     drawRoute,
     fitRouteToBounds,
-    getUserLocationCoordinates,
-    init,
+      getUserLocationCoordinates,
+      getUserLocationErrorMessage,
+      init,
     requestUserLocation,
     setView,
     showUserLocationError,

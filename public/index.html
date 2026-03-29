@@ -44,7 +44,7 @@
 
   <div class="results-dropdown mobile-only" id="resultsDropdown">
     <div class="results-dropdown-header">
-      <span class="results-dropdown-title">📍 Найдено мест</span>
+      <span class="results-dropdown-title" id="resultsDropdownTitle">📍 Найдено мест</span>
       <span class="results-dropdown-count" id="mobileResultsCount">0</span>
     </div>
     <div class="results-dropdown-list" id="mobileResultsList"></div>
@@ -117,6 +117,27 @@
           К списку мест
         </button>
         <div id="sidebarPlaceContent"></div>
+      </div>
+
+      <div class="sidebar-account-panel" id="sidebarAccountPanel">
+        <button class="sidebar-route-back" id="sidebarAccountBack" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          К карте
+        </button>
+        <div class="account-settings-card">
+          <div class="auth-profile-card account-profile-card">
+            <div class="auth-profile-icon" id="desktopProfileAvatar">A</div>
+            <div class="auth-profile-email" id="desktopProfileEmail"></div>
+            <div class="auth-profile-status" id="desktopProfileStatus"></div>
+          </div>
+          <div class="account-settings-section">
+            <div class="account-settings-title">Настройки аккаунта</div>
+            <p class="account-settings-text">Здесь можно посмотреть текущий статус аккаунта и выйти из профиля.</p>
+          </div>
+          <button class="auth-submit danger" id="desktopLogoutButton" type="button">Выйти</button>
+        </div>
       </div>
 
       <div class="sidebar-content" id="sidebarContent">
@@ -231,19 +252,34 @@
         </form>
       </div>
 
-      <div class="auth-view" data-auth-view="profile">
-        <div class="auth-profile-card">
-          <div class="auth-profile-icon" id="profileAvatar">A</div>
-          <div class="auth-profile-email" id="profileEmail"></div>
-          <div class="auth-profile-status" id="profileStatus"></div>
-        </div>
-        <button class="auth-submit danger" id="logoutButton" type="button">Выйти</button>
+    </div>
+  </div>
+
+  <div class="account-settings-modal mobile-only" id="accountSettingsModal">
+    <div class="auth-backdrop" id="accountSettingsBackdrop"></div>
+    <div class="account-settings-panel">
+      <button class="auth-close" id="accountSettingsClose" type="button" aria-label="Закрыть настройки аккаунта">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div class="auth-header">
+        <div class="auth-kicker">Аккаунт StudentMap</div>
+        <h2 class="auth-title">Настройки аккаунта</h2>
+        <p class="auth-subtitle">Вы уже вошли в аккаунт. Здесь можно проверить почту и выйти.</p>
       </div>
+      <div class="auth-profile-card account-profile-card">
+        <div class="auth-profile-icon" id="mobileProfileAvatar">A</div>
+        <div class="auth-profile-email" id="mobileProfileEmail"></div>
+        <div class="auth-profile-status" id="mobileProfileStatus"></div>
+      </div>
+      <button class="auth-submit danger" id="mobileLogoutButton" type="button">Выйти</button>
     </div>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="js/app.js"></script>
   <script src="js/auth.js"></script>
+  <div class="app-status" id="appStatus" role="status" aria-live="polite"></div>
 </body>
 </html>

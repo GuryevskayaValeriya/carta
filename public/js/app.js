@@ -13,9 +13,12 @@ const categoriesConfig = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  let appStatusTimer = null;
   const elements = {
+    appStatus: document.getElementById('appStatus'),
     placesContainer: document.getElementById('placesContainer'),
     resultsDropdown: document.getElementById('resultsDropdown'),
+    resultsDropdownTitle: document.getElementById('resultsDropdownTitle'),
     mobileResultsList: document.getElementById('mobileResultsList'),
     mobileResultsCount: document.getElementById('mobileResultsCount'),
     mobileSearchInput: document.getElementById('mobileSearchInput'),
@@ -41,12 +44,32 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarFilters: document.querySelector('.sidebar-filters')
   };
 
+  function showAppStatus(message, tone = 'info') {
+    if (!elements.appStatus || !message) {
+      return;
+    }
+
+    elements.appStatus.textContent = message;
+    elements.appStatus.dataset.state = tone;
+    elements.appStatus.classList.add('visible');
+
+    if (appStatusTimer) {
+      window.clearTimeout(appStatusTimer);
+    }
+
+    appStatusTimer = window.setTimeout(() => {
+      elements.appStatus.classList.remove('visible');
+      delete elements.appStatus.dataset.state;
+    }, 4200);
+  }
+
   let placesController;
 
   const mapController = createMapController({
     categoriesConfig,
     onMapClick: () => placesController?.handleMapClick(),
-    onPlaceSelect: (place) => placesController?.handlePlaceSelect(place)
+    onPlaceSelect: (place) => placesController?.handlePlaceSelect(place),
+    onStatusMessage: showAppStatus
   });
 
   const routeController = createRouteController({

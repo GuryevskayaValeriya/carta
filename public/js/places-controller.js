@@ -10,13 +10,21 @@ export function createPlacesController({
   let currentCategory = 'all';
   let currentSearch = '';
   let activePlace = null;
+  let placesState = 'loading';
+  let placesErrorMessage = '';
+  let mobileResultsOpen = false;
 
   function init() {
     setupEventListeners();
+    renderAll();
     loadPlaces();
   }
 
   async function loadPlaces() {
+    placesState = 'loading';
+    placesErrorMessage = '';
+    renderAll();
+
     try {
       const response = await fetch(`${apiBaseUrl}/places`);
       if (!response.ok) {
@@ -24,10 +32,15 @@ export function createPlacesController({
       }
 
       places = await response.json();
-      filteredPlaces = places;
-      renderAll();
+      placesState = 'ready';
+      filterPlaces();
     } catch (error) {
       console.error('Failed to load places:', error);
+      places = [];
+      filteredPlaces = [];
+      placesState = 'error';
+      placesErrorMessage = 'Не удалось загрузить места. Проверьте соединение и попробуйте снова.';
+      renderAll();
     }
   }
 
@@ -54,6 +67,7 @@ export function createPlacesController({
     });
 
     elements.mobileSearchInput?.addEventListener('focus', () => {
+      mobileResultsOpen = true;
       showMobileResults(true);
       toggleMobileCategories(false);
     });
@@ -66,7 +80,6 @@ export function createPlacesController({
     elements.mobileClearBtn?.addEventListener('click', () => {
       elements.mobileSearchInput.value = '';
       setSearch('');
-      toggleMobileCategories(true);
     });
 
     elements.sidebarPlaceBack?.addEventListener('click', clearActivePlace);
@@ -85,6 +98,7 @@ export function createPlacesController({
         !elements.mobileSearchInput.contains(event.target) &&
         elements.resultsDropdown.classList.contains('visible')
       ) {
+        mobileResultsOpen = false;
         showMobileResults(false);
         toggleMobileCategories(true);
       }
@@ -101,6 +115,11 @@ export function createPlacesController({
     document.querySelectorAll('.filter-btn-mobile').forEach((button) => {
       button.classList.toggle('active', button.dataset.category === category);
     });
+
+    if (window.innerWidth <= 768) {
+      mobileResultsOpen = true;
+      toggleMobileCategories(false);
+    }
 
     filterPlaces();
   }
@@ -119,6 +138,7 @@ export function createPlacesController({
       elements.mobileSearchInput.value = term;
     }
 
+    mobileResultsOpen = Boolean(term) || currentCategory !== 'all';
     filterPlaces();
   }
 
@@ -142,7 +162,7 @@ export function createPlacesController({
   }
 
   function renderAll() {
-    mapController.updateMarkers(filteredPlaces, activePlace?.id);
+    mapController.updateMarkers(placesState === 'ready' ? filteredPlaces : [], activePlace?.id);
     renderSidebarList();
     renderMobileResults();
     renderPlaceDetails();
@@ -156,8 +176,32 @@ export function createPlacesController({
 
     elements.placesContainer.innerHTML = '';
 
+    if (placesState === 'loading') {
+      elements.placesContainer.innerHTML = createStateMarkup({
+        title: 'Загружаем места',
+        description: 'Собираем подборку на карте и в списке.',
+        tone: 'info'
+      });
+      return;
+    }
+
+    if (placesState === 'error') {
+      elements.placesContainer.innerHTML = createStateMarkup({
+        title: 'Не удалось загрузить места',
+        description: placesErrorMessage,
+        tone: 'error',
+        actionLabel: 'Попробовать снова'
+      });
+      bindRetryAction(elements.placesContainer);
+      return;
+    }
+
     if (filteredPlaces.length === 0) {
-      elements.placesContainer.innerHTML = '<div class="no-results">Ничего не найдено</div>';
+      elements.placesContainer.innerHTML = createStateMarkup({
+        title: 'Ничего не найдено',
+        description: 'Измените категорию или очистите поиск, чтобы увидеть больше мест.',
+        tone: 'empty'
+      });
       return;
     }
 
@@ -189,12 +233,38 @@ export function createPlacesController({
     }
 
     elements.mobileResultsList.innerHTML = '';
-    elements.mobileResultsCount.textContent = filteredPlaces.length;
+    elements.mobileResultsCount.textContent = placesState === 'ready' ? filteredPlaces.length : '—';
+    updateMobileResultsTitle();
 
-    showMobileResults(currentSearch.length > 0);
+    const shouldShow = shouldShowMobileResults();
+    showMobileResults(shouldShow);
+
+    if (placesState === 'loading') {
+      elements.mobileResultsList.innerHTML = createStateMarkup({
+        title: 'Загружаем места',
+        description: 'Список появится через пару секунд.',
+        tone: 'info'
+      });
+      return;
+    }
+
+    if (placesState === 'error') {
+      elements.mobileResultsList.innerHTML = createStateMarkup({
+        title: 'Не удалось загрузить места',
+        description: placesErrorMessage,
+        tone: 'error',
+        actionLabel: 'Повторить'
+      });
+      bindRetryAction(elements.mobileResultsList);
+      return;
+    }
 
     if (filteredPlaces.length === 0) {
-      elements.mobileResultsList.innerHTML = '<div style="padding:20px;text-align:center;color:#94a3b8">Ничего не найдено</div>';
+      elements.mobileResultsList.innerHTML = createStateMarkup({
+        title: 'Ничего не найдено',
+        description: 'Попробуйте другую категорию или измените запрос.',
+        tone: 'empty'
+      });
       return;
     }
 
@@ -217,6 +287,39 @@ export function createPlacesController({
       });
 
       elements.mobileResultsList.appendChild(item);
+    });
+  }
+
+  function updateMobileResultsTitle() {
+    if (!elements.resultsDropdownTitle) {
+      return;
+    }
+
+    const category = categoriesConfig[currentCategory] || categoriesConfig.all;
+    const title = currentCategory === 'all'
+      ? '📍 Все места'
+      : `${category.emoji} ${category.name}`;
+
+    elements.resultsDropdownTitle.textContent = currentSearch
+      ? `${title} по запросу`
+      : title;
+  }
+
+  function shouldShowMobileResults() {
+    if (window.innerWidth > 768 || activePlace) {
+      return false;
+    }
+
+    if (placesState !== 'ready') {
+      return mobileResultsOpen;
+    }
+
+    return mobileResultsOpen || currentSearch.length > 0 || currentCategory !== 'all';
+  }
+
+  function bindRetryAction(container) {
+    container.querySelector('[data-action="retry-load-places"]')?.addEventListener('click', () => {
+      loadPlaces();
     });
   }
 
@@ -257,6 +360,7 @@ export function createPlacesController({
 
   function handlePlaceSelect(place) {
     activePlace = place;
+    mobileResultsOpen = false;
     mapController.setView(place.coordinates, 15);
     if (window.innerWidth <= 768) {
       elements.mobileSearchInput?.blur();
@@ -274,6 +378,7 @@ export function createPlacesController({
       return;
     }
 
+    mobileResultsOpen = false;
     showMobileResults(false);
     toggleMobileCategories(true);
     elements.mobileSearchInput?.blur();
@@ -321,12 +426,12 @@ export function createPlacesController({
 
   function syncMobileOverlay() {
     const detailVisible = elements.mobilePlaceSheet?.classList.contains('visible');
-    const shouldShowCategories = !detailVisible && currentSearch.length === 0;
+    const shouldShowCategories = !detailVisible && !shouldShowMobileResults();
 
     toggleMobileCategories(shouldShowCategories);
 
     if (window.innerWidth <= 768) {
-      showMobileResults(!detailVisible && currentSearch.length > 0);
+      showMobileResults(!detailVisible && shouldShowMobileResults());
     }
   }
 
@@ -358,6 +463,16 @@ export function createPlacesController({
     init,
     restorePlaceView
   };
+}
+
+function createStateMarkup({ title, description, tone, actionLabel }) {
+  return `
+    <div class="list-state list-state-${tone}">
+      <div class="list-state-title">${title}</div>
+      <div class="list-state-text">${description}</div>
+      ${actionLabel ? `<button type="button" class="list-state-action" data-action="retry-load-places">${actionLabel}</button>` : ''}
+    </div>
+  `;
 }
 
 function formatPrice(price) {

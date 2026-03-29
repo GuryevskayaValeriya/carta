@@ -7,6 +7,7 @@ const authState = {
 };
 
 const authElements = {};
+let appStatusTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   bindAuthElements();
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function bindAuthElements() {
+  authElements.appStatus = document.getElementById('appStatus');
   authElements.accountButton = document.getElementById('accountButton');
   authElements.accountButtonLabel = document.getElementById('accountButtonLabel');
   authElements.authModal = document.getElementById('authModal');
@@ -30,23 +32,57 @@ function bindAuthElements() {
   authElements.loginForm = document.getElementById('loginForm');
   authElements.registerForm = document.getElementById('registerForm');
   authElements.verifyForm = document.getElementById('verifyForm');
-  authElements.profileEmail = document.getElementById('profileEmail');
-  authElements.profileStatus = document.getElementById('profileStatus');
-  authElements.profileAvatar = document.getElementById('profileAvatar');
   authElements.resendCodeButton = document.getElementById('resendCodeButton');
-  authElements.logoutButton = document.getElementById('logoutButton');
   authElements.verifyEmailInput = document.getElementById('verifyEmail');
   authElements.resultsDropdown = document.getElementById('resultsDropdown');
+
+  authElements.sidebarContent = document.getElementById('sidebarContent');
+  authElements.sidebarFilters = document.querySelector('.sidebar-filters');
+  authElements.sidebarPlacePanel = document.getElementById('sidebarPlacePanel');
+  authElements.sidebarRoutePanel = document.getElementById('sidebarRoutePanel');
+  authElements.sidebarAccountPanel = document.getElementById('sidebarAccountPanel');
+  authElements.sidebarAccountBack = document.getElementById('sidebarAccountBack');
+
+  authElements.accountSettingsModal = document.getElementById('accountSettingsModal');
+  authElements.accountSettingsBackdrop = document.getElementById('accountSettingsBackdrop');
+  authElements.accountSettingsClose = document.getElementById('accountSettingsClose');
+
+  authElements.desktopProfileEmail = document.getElementById('desktopProfileEmail');
+  authElements.desktopProfileStatus = document.getElementById('desktopProfileStatus');
+  authElements.desktopProfileAvatar = document.getElementById('desktopProfileAvatar');
+  authElements.mobileProfileEmail = document.getElementById('mobileProfileEmail');
+  authElements.mobileProfileStatus = document.getElementById('mobileProfileStatus');
+  authElements.mobileProfileAvatar = document.getElementById('mobileProfileAvatar');
+
+  authElements.desktopLogoutButton = document.getElementById('desktopLogoutButton');
+  authElements.mobileLogoutButton = document.getElementById('mobileLogoutButton');
 }
 
 function setupAuthEventListeners() {
-  authElements.accountButton?.addEventListener('click', openAuthModal);
+  authElements.accountButton?.addEventListener('click', handleAccountButtonClick);
   authElements.authClose?.addEventListener('click', closeAuthModal);
   authElements.authBackdrop?.addEventListener('click', closeAuthModal);
+  authElements.sidebarAccountBack?.addEventListener('click', closeDesktopAccountPanel);
+  authElements.accountSettingsClose?.addEventListener('click', closeMobileAccountSettings);
+  authElements.accountSettingsBackdrop?.addEventListener('click', closeMobileAccountSettings);
 
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape' && authElements.authModal?.classList.contains('visible')) {
+    if (event.key !== 'Escape') {
+      return;
+    }
+
+    if (authElements.authModal?.classList.contains('visible')) {
       closeAuthModal();
+      return;
+    }
+
+    if (authElements.accountSettingsModal?.classList.contains('visible')) {
+      closeMobileAccountSettings();
+      return;
+    }
+
+    if (authElements.sidebarAccountPanel?.classList.contains('active')) {
+      closeDesktopAccountPanel();
     }
   });
 
@@ -61,8 +97,9 @@ function setupAuthEventListeners() {
   authElements.registerForm?.addEventListener('submit', handleRegisterSubmit);
   authElements.verifyForm?.addEventListener('submit', handleVerifySubmit);
   authElements.resendCodeButton?.addEventListener('click', handleResendCode);
-  authElements.logoutButton?.addEventListener('click', handleLogout);
-  window.addEventListener('resize', updateAccountButtonVisibility);
+  authElements.desktopLogoutButton?.addEventListener('click', handleLogout);
+  authElements.mobileLogoutButton?.addEventListener('click', handleLogout);
+  window.addEventListener('resize', handleViewportChange);
 }
 
 function setupAccountButtonVisibility() {
@@ -88,10 +125,44 @@ function updateAccountButtonVisibility() {
   }
 
   const isMobile = window.innerWidth <= 768;
-  const shouldHide =
-    isMobile && authElements.resultsDropdown?.classList.contains('visible');
+  const shouldHide = isMobile && authElements.resultsDropdown?.classList.contains('visible');
 
   authElements.accountButton.classList.toggle('search-active', Boolean(shouldHide));
+}
+
+function handleViewportChange() {
+  updateAccountButtonVisibility();
+
+  if (window.innerWidth <= 768) {
+    closeDesktopAccountPanel();
+    return;
+  }
+
+  closeMobileAccountSettings();
+}
+
+function handleAccountButtonClick() {
+  if (!authState.currentUser) {
+    openAuthModal();
+    return;
+  }
+
+  if (window.innerWidth <= 768) {
+    if (authElements.accountSettingsModal?.classList.contains('visible')) {
+      closeMobileAccountSettings();
+      return;
+    }
+
+    openMobileAccountSettings();
+    return;
+  }
+
+  if (authElements.sidebarAccountPanel?.classList.contains('active')) {
+    closeDesktopAccountPanel();
+    return;
+  }
+
+  openDesktopAccountPanel();
 }
 
 async function hydrateCurrentUser() {
@@ -114,21 +185,17 @@ function updateCurrentUser(user) {
   authState.currentUser = user;
 
   if (user) {
+    const initial = user.email.slice(0, 1).toUpperCase();
     authElements.accountButton?.classList.add('authorized');
     if (authElements.accountButtonLabel) {
-      authElements.accountButtonLabel.textContent = user.email.slice(0, 1).toUpperCase();
+      authElements.accountButtonLabel.textContent = initial;
     }
-    if (authElements.profileEmail) {
-      authElements.profileEmail.textContent = user.email;
-    }
-    if (authElements.profileStatus) {
-      authElements.profileStatus.textContent = user.isVerified
-        ? 'Почта подтверждена'
-        : 'Ожидается подтверждение почты';
-    }
-    if (authElements.profileAvatar) {
-      authElements.profileAvatar.textContent = user.email.slice(0, 1).toUpperCase();
-    }
+
+    updateProfileSummary({
+      email: user.email,
+      status: user.isVerified ? 'Почта подтверждена' : 'Ожидается подтверждение почты',
+      initial
+    });
     return;
   }
 
@@ -141,19 +208,103 @@ function updateCurrentUser(user) {
       </svg>
     `;
   }
+
+  updateProfileSummary({ email: '', status: '', initial: 'A' });
+  closeDesktopAccountPanel();
+  closeMobileAccountSettings();
+}
+
+function updateProfileSummary({ email, status, initial }) {
+  const summaries = [
+    [authElements.desktopProfileEmail, email],
+    [authElements.mobileProfileEmail, email],
+    [authElements.desktopProfileStatus, status],
+    [authElements.mobileProfileStatus, status],
+    [authElements.desktopProfileAvatar, initial],
+    [authElements.mobileProfileAvatar, initial]
+  ];
+
+  summaries.forEach(([element, value]) => {
+    if (element) {
+      element.textContent = value;
+    }
+  });
+}
+
+function showAppStatus(message, type = 'info') {
+  if (!authElements.appStatus || !message) {
+    return;
+  }
+
+  authElements.appStatus.textContent = message;
+  authElements.appStatus.dataset.state = type;
+  authElements.appStatus.classList.add('visible');
+
+  if (appStatusTimer) {
+    window.clearTimeout(appStatusTimer);
+  }
+
+  appStatusTimer = window.setTimeout(() => {
+    authElements.appStatus.classList.remove('visible');
+    delete authElements.appStatus.dataset.state;
+  }, 4200);
 }
 
 function openAuthModal() {
+  closeDesktopAccountPanel();
+  closeMobileAccountSettings();
   authElements.authModal?.classList.add('visible');
   document.body.classList.add('auth-open');
   clearAuthMessage();
-  setAuthView(authState.currentUser ? 'profile' : authState.activeView);
+  setAuthView(authState.activeView === 'verify' ? 'verify' : authState.activeView);
 }
 
 function closeAuthModal() {
   authElements.authModal?.classList.remove('visible');
   document.body.classList.remove('auth-open');
   clearAuthMessage();
+}
+
+function openDesktopAccountPanel() {
+  if (!authState.currentUser || !authElements.sidebarAccountPanel) {
+    return;
+  }
+
+  closeAuthModal();
+  closeMobileAccountSettings();
+  authElements.sidebarAccountPanel.classList.add('active');
+  authElements.sidebarContent?.classList.add('hidden');
+  authElements.sidebarFilters?.classList.add('hidden');
+  authElements.sidebarPlacePanel?.classList.remove('active');
+  authElements.sidebarRoutePanel?.classList.remove('active');
+}
+
+function closeDesktopAccountPanel() {
+  if (!authElements.sidebarAccountPanel) {
+    return;
+  }
+
+  authElements.sidebarAccountPanel.classList.remove('active');
+  authElements.sidebarContent?.classList.remove('hidden');
+  authElements.sidebarFilters?.classList.remove('hidden');
+}
+
+function openMobileAccountSettings() {
+  if (!authState.currentUser) {
+    return;
+  }
+
+  closeAuthModal();
+  closeDesktopAccountPanel();
+  authElements.accountSettingsModal?.classList.add('visible');
+  document.body.classList.add('auth-open');
+}
+
+function closeMobileAccountSettings() {
+  authElements.accountSettingsModal?.classList.remove('visible');
+  if (!authElements.authModal?.classList.contains('visible')) {
+    document.body.classList.remove('auth-open');
+  }
 }
 
 function setAuthView(viewName) {
@@ -170,14 +321,12 @@ function setAuthView(viewName) {
   const titles = {
     login: ['Вход в аккаунт', 'Войдите в свой аккаунт StudentMap.'],
     register: ['Регистрация', 'Создайте аккаунт и подтвердите почту кодом из письма.'],
-    verify: ['Подтверждение почты', 'Введите код, который мы отправили вам на почту.'],
-    profile: ['Ваш аккаунт', 'Вы вошли в аккаунт и можете продолжать пользоваться картой.']
+    verify: ['Подтверждение почты', 'Введите код, который мы отправили вам на почту.']
   };
 
   const [title, subtitle] = titles[viewName] || titles.login;
   if (authElements.authTabs) {
-    authElements.authTabs.style.display =
-      viewName === 'login' || viewName === 'register' ? 'flex' : 'none';
+    authElements.authTabs.style.display = viewName === 'login' || viewName === 'register' ? 'flex' : 'none';
   }
   if (authElements.authTitle) {
     authElements.authTitle.textContent = title;
@@ -277,8 +426,10 @@ async function handleVerifySubmit(event) {
     }
 
     updateCurrentUser(data.user || null);
-    setAuthView('profile');
-    setAuthMessage('Почта подтверждена. Вы вошли в аккаунт.', 'success');
+    authElements.verifyForm?.reset();
+    closeAuthModal();
+    setAuthView('login');
+    showAppStatus('Почта подтверждена. Вы уже в аккаунте.', 'success');
   } catch (error) {
     setAuthMessage(error.message, 'error');
   } finally {
@@ -311,8 +462,10 @@ async function handleLoginSubmit(event) {
     }
 
     updateCurrentUser(data.user || null);
-    setAuthView('profile');
-    setAuthMessage('Вход выполнен успешно.', 'success');
+    authElements.loginForm?.reset();
+    closeAuthModal();
+    setAuthView('login');
+    showAppStatus('Вход выполнен успешно.', 'success');
   } catch (error) {
     setAuthMessage(error.message, 'error');
   } finally {
@@ -353,8 +506,7 @@ async function handleResendCode() {
 }
 
 async function handleLogout() {
-  clearAuthMessage();
-  authElements.logoutButton.disabled = true;
+  setLogoutBusy(true);
 
   try {
     const response = await fetch(`${AUTH_API_BASE}/logout`, {
@@ -373,12 +525,22 @@ async function handleLogout() {
     authElements.registerForm?.reset();
     authElements.verifyForm?.reset();
     closeAuthModal();
+    closeMobileAccountSettings();
     setAuthView('login');
+    showAppStatus('Вы вышли из аккаунта.', 'success');
   } catch (error) {
-    setAuthMessage(error.message, 'error');
+    showAppStatus(error.message, 'error');
   } finally {
-    authElements.logoutButton.disabled = false;
+    setLogoutBusy(false);
   }
+}
+
+function setLogoutBusy(isBusy) {
+  [authElements.desktopLogoutButton, authElements.mobileLogoutButton].forEach((button) => {
+    if (button) {
+      button.disabled = isBusy;
+    }
+  });
 }
 
 function toggleFormBusy(form, isBusy) {

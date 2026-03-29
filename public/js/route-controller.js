@@ -41,7 +41,10 @@ export function createRouteController({ apiBaseUrl, elements, mapController }) {
         driving: drivingRoute.status === 'fulfilled' ? drivingRoute.value : null
       };
 
-      currentRouteProfile = getOptimalProfile(calculateDistance(userCoords, place.coordinates));
+      currentRouteProfile = getPreferredProfile(
+        calculateDistance(userCoords, place.coordinates),
+        routeResults
+      );
       renderRouteTransports();
 
       if (routeResults[currentRouteProfile]) {
@@ -52,8 +55,11 @@ export function createRouteController({ apiBaseUrl, elements, mapController }) {
       console.error('Route error:', error);
       if (error.code) {
         mapController.showUserLocationError(error);
+        setTransportsError(mapController.getUserLocationErrorMessage(error));
+        return;
       }
-      setTransportsError();
+
+      setTransportsError('Не удалось построить маршрут. Попробуйте еще раз.');
     }
   }
 
@@ -138,6 +144,7 @@ export function createRouteController({ apiBaseUrl, elements, mapController }) {
       mapController.fitRouteToBounds();
     } catch (error) {
       console.error('Switch route error:', error);
+      setTransportsError('Не удалось обновить маршрут. Попробуйте еще раз.');
     }
   }
 
@@ -193,10 +200,11 @@ export function createRouteController({ apiBaseUrl, elements, mapController }) {
     }
   }
 
-  function setTransportsError() {
+  function setTransportsError(message) {
     const html = `
       <div class="route-transport-error">
-        <span>Не удалось построить маршрут</span>
+        <strong>Маршрут недоступен</strong>
+        <span>${message}</span>
       </div>
     `;
 
@@ -265,6 +273,16 @@ function calculateDistance(from, to) {
 
 function getOptimalProfile(distance) {
   return distance < 2000 ? 'foot' : 'driving';
+}
+
+function getPreferredProfile(distance, routeResults) {
+  const optimalProfile = getOptimalProfile(distance);
+
+  if (routeResults[optimalProfile]) {
+    return optimalProfile;
+  }
+
+  return routeResults.foot ? 'foot' : 'driving';
 }
 
 function formatTime(seconds) {

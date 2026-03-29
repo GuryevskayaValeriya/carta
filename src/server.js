@@ -28,7 +28,7 @@ app.get('/api/route', async (req, res) => {
     return res.status(400).json({ error: 'Missing coordinates' });
   }
 
-  const validProfiles = ['driving', 'foot', 'bike'];
+  const validProfiles = ['driving', 'foot'];
   const routeProfile = validProfiles.includes(profile) ? profile : 'foot';
   
   const ghProfile = routeProfile === 'driving' ? 'car' : routeProfile;
