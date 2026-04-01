@@ -58,7 +58,7 @@
    ```
 4. Запусти инициализацию БД:
    ```bash
-   npm run init-db
+   npm run init-db / npm run reset-db
    ```
 5. Запусти сервер:
    ```bash
