@@ -7,6 +7,12 @@ function normalizeEmail(email) {
   return String(email || '').trim().toLowerCase();
 }
 
+function normalizePersonName(value) {
+  return String(value || '')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
 function createVerificationCode(length = 6) {
   const max = 10 ** length;
   return crypto.randomInt(0, max).toString().padStart(length, '0');
@@ -55,5 +61,6 @@ module.exports = {
   hashSessionToken,
   hashVerificationCode,
   normalizeEmail,
+  normalizePersonName,
   verifyPassword
 };

@@ -813,6 +813,258 @@ body {
   margin-top: auto;
 }
 
+.place-reviews-section {
+  display: grid;
+  gap: 16px;
+}
+
+.place-reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.place-reviews-title {
+  margin-bottom: 6px;
+}
+
+.place-reviews-subtitle {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.place-reviews-summary {
+  min-width: 92px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: #eff6ff;
+  text-align: center;
+}
+
+.place-reviews-score {
+  display: block;
+  color: #1d4ed8;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.place-reviews-count {
+  display: block;
+  margin-top: 6px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.place-reviews-list {
+  display: grid;
+  gap: 12px;
+}
+
+.place-review-card {
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.place-review-card.owner {
+  border-color: #bfdbfe;
+  box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.12);
+}
+
+.place-review-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.place-review-author {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.place-review-date {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.place-review-rating {
+  color: #f59e0b;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.place-review-body {
+  margin-top: 12px;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.place-review-owner {
+  display: inline-flex;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.place-review-owner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.place-detail-review-edit {
+  width: auto;
+  padding: 9px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.place-reviews-empty,
+.place-reviews-state,
+.place-review-guest {
+  display: grid;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+}
+
+.place-reviews-state.error {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+
+.place-reviews-state-title {
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.place-reviews-state-text {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.place-detail-login-btn {
+  justify-self: start;
+  border: none;
+  border-radius: 999px;
+  padding: 11px 16px;
+  background: #0f172a;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.place-review-composer {
+  padding: 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #dbe3ef;
+}
+
+.place-review-composer-title {
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 800;
+  margin-bottom: 14px;
+}
+
+.place-detail-review-form {
+  display: grid;
+  gap: 14px;
+}
+
+.place-review-field {
+  display: grid;
+  gap: 8px;
+}
+
+.place-review-label {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.place-review-select,
+.place-review-textarea {
+  width: 100%;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.92);
+  font: inherit;
+  color: #0f172a;
+}
+
+.place-review-select:focus,
+.place-review-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+}
+
+.place-review-textarea {
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.5;
+}
+
+.place-review-form-error {
+  padding: 11px 13px;
+  border-radius: 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.place-review-form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.place-review-form-hint {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.place-review-form-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.place-review-form-actions .auth-submit,
+.place-review-form-actions .auth-secondary {
+  width: auto;
+  padding: 12px 16px;
+  border-radius: 14px;
+}
+
 .place-detail-route-btn {
   width: 100%;
   border: none;
@@ -1155,6 +1407,7 @@ body.auth-open {
   justify-content: center;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.26);
   cursor: pointer;
+  overflow: hidden;
   transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
@@ -1182,11 +1435,27 @@ body.auth-open {
   justify-content: center;
   font-size: 18px;
   font-weight: 800;
+  overflow: hidden;
+}
+
+.account-button.has-avatar .account-button-label {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .account-button-label svg {
   width: 100%;
   height: 100%;
+}
+
+.account-button-image,
+.auth-profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
 }
 
 .auth-modal {
@@ -1466,12 +1735,21 @@ body.auth-open {
   justify-content: center;
   font-size: 24px;
   font-weight: 800;
+  overflow: hidden;
 }
 
 .auth-profile-email {
   color: #0f172a;
   font-size: 18px;
   font-weight: 700;
+  text-align: center;
+  word-break: break-word;
+}
+
+.auth-profile-name {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 800;
   text-align: center;
   word-break: break-word;
 }
@@ -1510,6 +1788,60 @@ body.auth-open {
   color: #475569;
   font-size: 14px;
   line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.account-profile-form {
+  display: grid;
+  gap: 14px;
+}
+
+.account-avatar-field input[type="file"] {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.account-avatar-field input[type="file"]::file-selector-button {
+  margin-right: 12px;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: #0f172a;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.account-profile-hint {
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.account-profile-message {
+  margin-bottom: 0;
+}
+
+.account-profile-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.account-profile-actions .auth-submit,
+.account-profile-actions .auth-secondary {
+  flex: 1;
+  width: auto;
+  padding: 12px 16px;
+  border-radius: 14px;
 }
 
 .account-settings-modal {
@@ -1531,6 +1863,7 @@ body.auth-open {
   left: 50%;
   top: 50%;
   width: min(460px, calc(100% - 20px));
+  max-height: min(88vh, 760px);
   padding: 22px 18px;
   border-radius: 24px;
   background:
@@ -1538,6 +1871,8 @@ body.auth-open {
     linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid rgba(226, 232, 240, 0.95);
   box-shadow: 0 30px 70px rgba(15, 23, 42, 0.28);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   transform: translate(-50%, -46%);
   transition: transform 0.25s ease;
 }
@@ -1561,6 +1896,13 @@ body.auth-open {
     border-radius: 24px;
   }
 
+  .account-settings-panel {
+    width: calc(100% - 20px);
+    max-height: calc(100dvh - 20px);
+    padding: 22px 18px 18px;
+    border-radius: 24px;
+  }
+
   .auth-title {
     font-size: 24px;
   }
@@ -1573,5 +1915,37 @@ body.auth-open {
     bottom: calc(16px + env(safe-area-inset-bottom));
     min-width: calc(100% - 20px);
     max-width: calc(100% - 20px);
+  }
+
+  .place-reviews-header,
+  .place-review-form-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .place-reviews-summary,
+  .place-detail-login-btn {
+    justify-self: stretch;
+    width: 100%;
+  }
+
+  .place-review-form-actions {
+    flex-direction: column;
+  }
+
+  .place-review-owner-row {
+    align-items: stretch;
+  }
+
+  .account-profile-actions {
+    flex-direction: column;
+  }
+
+  .place-review-form-actions .auth-submit,
+  .place-review-form-actions .auth-secondary,
+  .place-detail-review-edit,
+  .account-profile-actions .auth-submit,
+  .account-profile-actions .auth-secondary {
+    width: 100%;
   }
 }

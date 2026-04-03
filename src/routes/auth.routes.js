@@ -8,33 +8,16 @@ const {
   hashSessionToken,
   hashVerificationCode,
   normalizeEmail,
+  normalizePersonName,
   verifyPassword
 } = require('../utils/auth');
 const { isMailConfigured, sendVerificationCodeEmail } = require('../utils/mail');
+const { getCurrentUser, parseCookies, SESSION_COOKIE_NAME } = require('../utils/session');
 
 const router = express.Router();
 
-const SESSION_COOKIE_NAME = 'studentmap_session';
 const SESSION_DAYS = Number(process.env.AUTH_SESSION_DAYS || 30);
 const VERIFICATION_TTL_MINUTES = Number(process.env.VERIFICATION_CODE_TTL_MINUTES || 15);
-
-function parseCookies(headerValue) {
-  return String(headerValue || '')
-    .split(';')
-    .map((part) => part.trim())
-    .filter(Boolean)
-    .reduce((acc, entry) => {
-      const separatorIndex = entry.indexOf('=');
-      if (separatorIndex === -1) {
-        return acc;
-      }
-
-      const key = entry.slice(0, separatorIndex).trim();
-      const value = entry.slice(separatorIndex + 1).trim();
-      acc[key] = decodeURIComponent(value);
-      return acc;
-    }, {});
-}
 
 function setSessionCookie(res, token) {
   const cookieParts = [
@@ -69,9 +52,18 @@ function clearSessionCookie(res) {
 }
 
 function sanitizeUser(user) {
+  const displayName = [user.first_name, user.last_name]
+    .filter((value) => typeof value === 'string' && value.trim())
+    .join(' ')
+    .trim() || 'Пользователь';
+
   return {
     id: user.id,
     email: user.email,
+    firstName: user.first_name,
+    lastName: user.last_name || '',
+    avatarData: user.avatar_data || '',
+    displayName,
     isVerified: Boolean(user.email_verified),
     createdAt: user.created_at
   };
@@ -97,32 +89,6 @@ async function createSessionForUser(client, userId) {
   );
 
   return { token };
-}
-
-async function getCurrentUser(req) {
-  const cookies = parseCookies(req.headers.cookie);
-  const sessionToken = cookies[SESSION_COOKIE_NAME];
-
-  if (!sessionToken) {
-    return null;
-  }
-
-  await removeExpiredAuthArtifacts();
-
-  const tokenHash = hashSessionToken(sessionToken);
-  const result = await pool.query(
-    `
-      SELECT users.*
-      FROM auth_sessions
-      JOIN users ON users.id = auth_sessions.user_id
-      WHERE auth_sessions.token_hash = $1
-        AND auth_sessions.expires_at > NOW()
-      LIMIT 1
-    `,
-    [tokenHash]
-  );
-
-  return result.rows[0] || null;
 }
 
 async function issueVerificationCode(client, user) {
@@ -152,6 +118,7 @@ async function issueVerificationCode(client, user) {
 
 router.get('/me', async (req, res) => {
   try {
+    await removeExpiredAuthArtifacts();
     const user = await getCurrentUser(req);
 
     if (!user) {
@@ -165,12 +132,59 @@ router.get('/me', async (req, res) => {
   }
 });
 
+router.patch('/me', async (req, res) => {
+  const firstName = normalizePersonName(req.body.firstName);
+  const lastName = normalizePersonName(req.body.lastName);
+  const avatarValidation = normalizeAvatarData(req.body.avatarData);
+
+  if (!firstName) {
+    return res.status(400).json({ error: 'Введите имя' });
+  }
+
+  if (!avatarValidation.ok) {
+    return res.status(400).json({ error: avatarValidation.error });
+  }
+
+  try {
+    await removeExpiredAuthArtifacts();
+    const user = await getCurrentUser(req);
+
+    if (!user) {
+      return res.status(401).json({ error: 'Сначала войдите в аккаунт' });
+    }
+
+    const result = await pool.query(
+      `
+        UPDATE users
+        SET first_name = $2,
+            last_name = $3,
+            avatar_data = $4,
+            updated_at = NOW()
+        WHERE id = $1
+        RETURNING *
+      `,
+      [user.id, firstName, lastName || null, avatarValidation.value]
+    );
+
+    return res.json({ user: sanitizeUser(result.rows[0]) });
+  } catch (error) {
+    console.error('Profile update failed:', error);
+    return res.status(500).json({ error: 'Не удалось обновить профиль' });
+  }
+});
+
 router.post('/register', async (req, res) => {
   const email = normalizeEmail(req.body.email);
+  const firstName = normalizePersonName(req.body.firstName);
+  const lastName = normalizePersonName(req.body.lastName);
   const password = String(req.body.password || '');
 
   if (!email || !email.includes('@')) {
     return res.status(400).json({ error: 'Введите корректный email' });
+  }
+
+  if (!firstName) {
+    return res.status(400).json({ error: 'Введите имя' });
   }
 
   if (password.length < 8) {
@@ -208,22 +222,22 @@ router.post('/register', async (req, res) => {
       const updatedUserResult = await client.query(
         `
           UPDATE users
-          SET password_hash = $2, updated_at = NOW()
+          SET password_hash = $2, first_name = $3, last_name = $4, updated_at = NOW()
           WHERE id = $1
           RETURNING *
         `,
-        [user.id, passwordHash]
+        [user.id, passwordHash, firstName, lastName || null]
       );
       user = updatedUserResult.rows[0];
       code = await issueVerificationCode(client, user);
     } else {
       const insertedUserResult = await client.query(
         `
-          INSERT INTO users (id, email, password_hash, email_verified)
-          VALUES ($1, $2, $3, false)
+          INSERT INTO users (id, email, first_name, last_name, password_hash, email_verified)
+          VALUES ($1, $2, $3, $4, $5, false)
           RETURNING *
         `,
-        [crypto.randomUUID(), email, passwordHash]
+        [crypto.randomUUID(), email, firstName, lastName || null, passwordHash]
       );
       user = insertedUserResult.rows[0];
       code = await issueVerificationCode(client, user);
@@ -468,5 +482,28 @@ router.post('/logout', async (req, res) => {
     return res.status(500).json({ error: 'Не удалось выйти из аккаунта' });
   }
 });
+
+function normalizeAvatarData(value) {
+  if (value === null || value === undefined || value === '') {
+    return { ok: true, value: null };
+  }
+
+  if (typeof value !== 'string') {
+    return { ok: false, error: 'Некорректный формат аватарки' };
+  }
+
+  const trimmedValue = value.trim();
+  const isSupportedImage = /^data:image\/(png|jpeg|jpg|webp|gif);base64,[a-z0-9+/=]+$/i.test(trimmedValue);
+
+  if (!isSupportedImage) {
+    return { ok: false, error: 'Поддерживаются только PNG, JPG, WEBP и GIF' };
+  }
+
+  if (trimmedValue.length > 1_500_000) {
+    return { ok: false, error: 'Аватарка слишком большая. Выберите файл до 1 МБ' };
+  }
+
+  return { ok: true, value: trimmedValue };
+}
 
 module.exports = router;

@@ -129,12 +129,33 @@
         <div class="account-settings-card">
           <div class="auth-profile-card account-profile-card">
             <div class="auth-profile-icon" id="desktopProfileAvatar">A</div>
+            <div class="auth-profile-name" id="desktopProfileName"></div>
             <div class="auth-profile-email" id="desktopProfileEmail"></div>
             <div class="auth-profile-status" id="desktopProfileStatus"></div>
           </div>
           <div class="account-settings-section">
             <div class="account-settings-title">Настройки аккаунта</div>
-            <p class="account-settings-text">Здесь можно посмотреть текущий статус аккаунта и выйти из профиля.</p>
+            <p class="account-settings-text">Здесь можно обновить имя, фамилию и аватарку профиля.</p>
+            <form class="account-profile-form" data-account-profile-form>
+              <label class="auth-field">
+                <span>Имя</span>
+                <input name="firstName" type="text" placeholder="Например, Алина" required>
+              </label>
+              <label class="auth-field">
+                <span>Фамилия</span>
+                <input name="lastName" type="text" placeholder="Необязательно">
+              </label>
+              <label class="auth-field account-avatar-field">
+                <span>Аватарка</span>
+                <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
+              </label>
+              <div class="account-profile-hint">Поддерживаются PNG, JPG, WEBP и GIF до 1 МБ.</div>
+              <div class="auth-message account-profile-message" data-profile-message></div>
+              <div class="account-profile-actions">
+                <button class="auth-secondary" type="button" data-action="remove-avatar">Убрать аватарку</button>
+                <button class="auth-submit" type="submit">Сохранить профиль</button>
+              </div>
+            </form>
           </div>
           <button class="auth-submit danger" id="desktopLogoutButton" type="button">Выйти</button>
         </div>
@@ -222,6 +243,14 @@
       <div class="auth-view" data-auth-view="register">
         <form class="auth-form" id="registerForm">
           <label class="auth-field">
+            <span>Имя</span>
+            <input name="firstName" type="text" placeholder="Например, Алина" required>
+          </label>
+          <label class="auth-field">
+            <span>Фамилия</span>
+            <input name="lastName" type="text" placeholder="Необязательно">
+          </label>
+          <label class="auth-field">
             <span>Почта</span>
             <input name="email" type="email" placeholder="you@example.com" required>
           </label>
@@ -266,13 +295,34 @@
       <div class="auth-header">
         <div class="auth-kicker">Аккаунт StudentMap</div>
         <h2 class="auth-title">Настройки аккаунта</h2>
-        <p class="auth-subtitle">Вы уже вошли в аккаунт. Здесь можно проверить почту и выйти.</p>
+        <p class="auth-subtitle">Вы уже вошли в аккаунт. Здесь можно изменить имя, фамилию и аватарку.</p>
       </div>
       <div class="auth-profile-card account-profile-card">
         <div class="auth-profile-icon" id="mobileProfileAvatar">A</div>
+        <div class="auth-profile-name" id="mobileProfileName"></div>
         <div class="auth-profile-email" id="mobileProfileEmail"></div>
         <div class="auth-profile-status" id="mobileProfileStatus"></div>
       </div>
+      <form class="account-profile-form" data-account-profile-form>
+        <label class="auth-field">
+          <span>Имя</span>
+          <input name="firstName" type="text" placeholder="Например, Алина" required>
+        </label>
+        <label class="auth-field">
+          <span>Фамилия</span>
+          <input name="lastName" type="text" placeholder="Необязательно">
+        </label>
+        <label class="auth-field account-avatar-field">
+          <span>Аватарка</span>
+          <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
+        </label>
+        <div class="account-profile-hint">Поддерживаются PNG, JPG, WEBP и GIF до 1 МБ.</div>
+        <div class="auth-message account-profile-message" data-profile-message></div>
+        <div class="account-profile-actions">
+          <button class="auth-secondary" type="button" data-action="remove-avatar">Убрать аватарку</button>
+          <button class="auth-submit" type="submit">Сохранить профиль</button>
+        </div>
+      </form>
       <button class="auth-submit danger" id="mobileLogoutButton" type="button">Выйти</button>
     </div>
   </div>

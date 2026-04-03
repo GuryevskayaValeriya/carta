@@ -13,6 +13,7 @@ export function createPlacesController({
   let placesState = 'loading';
   let placesErrorMessage = '';
   let mobileResultsOpen = false;
+  const reviewsByPlaceId = {};
 
   function init() {
     setupEventListeners();
@@ -88,6 +89,15 @@ export function createPlacesController({
 
     window.addEventListener('resize', () => {
       restorePlaceView();
+    });
+
+    window.addEventListener('studentmap:auth-changed', () => {
+      if (!activePlace) {
+        return;
+      }
+
+      renderPlaceDetails();
+      ensurePlaceReviews(activePlace.id, { force: true });
     });
 
     document.addEventListener('click', (event) => {
@@ -337,35 +347,278 @@ export function createPlacesController({
     }
 
     const category = categoriesConfig[activePlace.category] || categoriesConfig.all;
-    const detailMarkup = buildPlaceDetailMarkup(activePlace, category);
+    const reviewState = getReviewState(activePlace.id);
+    const currentUser = getCurrentUser();
+    const detailMarkup = buildPlaceDetailMarkup({
+      place: activePlace,
+      category,
+      reviewState,
+      currentUser
+    });
 
     if (elements.sidebarPlaceContent) {
       elements.sidebarPlaceContent.innerHTML = detailMarkup;
-      bindDetailActions(elements.sidebarPlaceContent);
+      bindDetailActions(elements.sidebarPlaceContent, reviewState);
     }
 
     if (elements.mobilePlaceContent) {
       elements.mobilePlaceContent.innerHTML = detailMarkup;
-      bindDetailActions(elements.mobilePlaceContent);
+      bindDetailActions(elements.mobilePlaceContent, reviewState);
     }
   }
 
-  function bindDetailActions(container) {
+  function bindDetailActions(container, reviewState) {
     container.querySelector('.place-detail-route-btn')?.addEventListener('click', () => {
       if (activePlace) {
         routeController.openRouteModal(activePlace);
       }
     });
+
+    container.querySelector('.place-detail-review-edit')?.addEventListener('click', handleReviewEditStart);
+    container.querySelector('.place-detail-review-cancel')?.addEventListener('click', handleReviewEditCancel);
+    container.querySelector('.place-detail-review-form')?.addEventListener('submit', handleReviewSubmit);
+    container.querySelector('.place-detail-review-form')?.addEventListener('input', handleReviewDraftChange);
+    container.querySelector('.place-detail-review-delete')?.addEventListener('click', handleReviewDelete);
+    container.querySelector('.place-detail-login-btn')?.addEventListener('click', () => {
+      window.StudentMapAuth?.openAuthModal?.();
+    });
+
+    container.querySelector('[data-action="retry-load-reviews"]')?.addEventListener('click', () => {
+      if (activePlace) {
+        ensurePlaceReviews(activePlace.id, { force: true });
+      }
+    });
+
+    if (reviewState.formError) {
+      container.querySelector('.place-review-form-error')?.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function handleReviewEditStart() {
+    if (!activePlace) {
+      return;
+    }
+
+    const reviewState = getReviewState(activePlace.id);
+    reviewState.isEditingOwnReview = true;
+    reviewState.formError = '';
+    reviewState.formDraft = createReviewDraft(reviewState);
+    renderPlaceDetails();
+  }
+
+  function handleReviewEditCancel() {
+    if (!activePlace) {
+      return;
+    }
+
+    const reviewState = getReviewState(activePlace.id);
+    reviewState.isEditingOwnReview = false;
+    reviewState.formError = '';
+    reviewState.formDraft = createReviewDraft(reviewState);
+    renderPlaceDetails();
+  }
+
+  async function handleReviewSubmit(event) {
+    event.preventDefault();
+
+    if (!activePlace) {
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      window.StudentMapAuth?.openAuthModal?.();
+      return;
+    }
+
+    const form = event.currentTarget;
+    const reviewState = getReviewState(activePlace.id);
+    const ownReview = getOwnReview(reviewState);
+    const formData = new FormData(form);
+    const rating = Number(formData.get('rating'));
+    const body = String(formData.get('body') || '');
+
+    reviewState.submitting = true;
+    reviewState.formError = '';
+    reviewState.formDraft = {
+      rating: String(rating || 5),
+      body
+    };
+    renderPlaceDetails();
+
+    try {
+      const response = await fetch(
+        ownReview
+          ? `${apiBaseUrl}/reviews/${ownReview.id}`
+          : `${apiBaseUrl}/places/${encodeURIComponent(activePlace.id)}/reviews`,
+        {
+          method: ownReview ? 'PATCH' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify({ rating, body })
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Не удалось сохранить отзыв');
+      }
+
+      reviewState.formDraft = null;
+      reviewState.isEditingOwnReview = false;
+      await ensurePlaceReviews(activePlace.id, { force: true });
+    } catch (error) {
+      reviewState.submitting = false;
+      reviewState.isEditingOwnReview = Boolean(ownReview);
+      reviewState.formError = error.message;
+      renderPlaceDetails();
+    }
+  }
+
+  function handleReviewDraftChange(event) {
+    if (!activePlace) {
+      return;
+    }
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const reviewState = getReviewState(activePlace.id);
+
+    reviewState.formDraft = {
+      rating: String(formData.get('rating') || 5),
+      body: String(formData.get('body') || '')
+    };
+
+    if (reviewState.formError) {
+      reviewState.formError = '';
+    }
+  }
+
+  async function handleReviewDelete() {
+    if (!activePlace) {
+      return;
+    }
+
+    const reviewState = getReviewState(activePlace.id);
+    const ownReview = getOwnReview(reviewState);
+    if (!ownReview) {
+      return;
+    }
+
+    reviewState.submitting = true;
+    reviewState.formError = '';
+    renderPlaceDetails();
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/reviews/${ownReview.id}`, {
+        method: 'DELETE',
+        credentials: 'same-origin'
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Не удалось удалить отзыв');
+      }
+
+      reviewState.formDraft = null;
+      reviewState.isEditingOwnReview = false;
+      await ensurePlaceReviews(activePlace.id, { force: true });
+    } catch (error) {
+      reviewState.submitting = false;
+      reviewState.isEditingOwnReview = true;
+      reviewState.formError = error.message;
+      renderPlaceDetails();
+    }
+  }
+
+  async function ensurePlaceReviews(placeId, { force = false } = {}) {
+    const reviewState = getReviewState(placeId);
+    const currentUser = getCurrentUser();
+    const currentUserId = currentUser?.id || null;
+
+    if (!force && reviewState.status === 'ready' && reviewState.loadedForUserId === currentUserId) {
+      return reviewState;
+    }
+
+    reviewState.status = 'loading';
+    reviewState.error = '';
+    reviewState.loadedForUserId = currentUserId;
+
+    if (activePlace?.id === placeId) {
+      renderPlaceDetails();
+    }
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/places/${encodeURIComponent(placeId)}/reviews`, {
+        credentials: 'same-origin'
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Не удалось загрузить отзывы');
+      }
+
+      reviewState.status = 'ready';
+      reviewState.error = '';
+      reviewState.summary = data.summary || { averageRating: null, reviewsCount: 0 };
+      reviewState.reviews = Array.isArray(data.reviews) ? data.reviews : [];
+      reviewState.submitting = false;
+      reviewState.formError = '';
+      reviewState.formDraft = createReviewDraft(reviewState);
+      reviewState.isEditingOwnReview = false;
+    } catch (error) {
+      console.error('Failed to load reviews:', error);
+      reviewState.status = 'error';
+      reviewState.error = error.message || 'Не удалось загрузить отзывы';
+      reviewState.submitting = false;
+    }
+
+    if (activePlace?.id === placeId) {
+      renderPlaceDetails();
+    }
+
+    return reviewState;
+  }
+
+  function getReviewState(placeId) {
+    if (!reviewsByPlaceId[placeId]) {
+      reviewsByPlaceId[placeId] = {
+        status: 'idle',
+        error: '',
+        loadedForUserId: null,
+        reviews: [],
+        summary: {
+          averageRating: null,
+          reviewsCount: 0
+        },
+        submitting: false,
+        formError: '',
+        formDraft: null,
+        isEditingOwnReview: false
+      };
+    }
+
+    return reviewsByPlaceId[placeId];
   }
 
   function handlePlaceSelect(place) {
     activePlace = place;
     mobileResultsOpen = false;
+    if (getReviewState(place.id).status === 'idle') {
+      getReviewState(place.id).status = 'loading';
+    }
     mapController.setView(place.coordinates, 15);
+
+    if (elements.sidebarAccountPanel?.classList.contains('active')) {
+      elements.sidebarAccountPanel.classList.remove('active');
+    }
+
     if (window.innerWidth <= 768) {
       elements.mobileSearchInput?.blur();
     }
+
     renderAll();
+    ensurePlaceReviews(place.id);
   }
 
   function handleMapClick() {
@@ -419,6 +672,7 @@ export function createPlacesController({
     }
 
     elements.sidebarPlacePanel?.classList.add('active');
+    elements.sidebarAccountPanel?.classList.remove('active');
     elements.sidebarContent?.classList.add('hidden');
     elements.sidebarFilters?.classList.add('hidden');
     syncMobileOverlay();
@@ -481,7 +735,7 @@ function formatPrice(price) {
   return `${price.min}–${price.max}₽`;
 }
 
-function buildPlaceDetailMarkup(place, category) {
+function buildPlaceDetailMarkup({ place, category, reviewState, currentUser }) {
   const links = [];
 
   if (place.links?.map) {
@@ -521,6 +775,8 @@ function buildPlaceDetailMarkup(place, category) {
         </section>
       ` : ''}
 
+      ${buildReviewsMarkup(reviewState, currentUser)}
+
       ${links.length > 0 ? `<div class="place-detail-links">${links.join('')}</div>` : ''}
 
       <div class="place-detail-actions">
@@ -528,4 +784,200 @@ function buildPlaceDetailMarkup(place, category) {
       </div>
     </article>
   `;
+}
+
+function buildReviewsMarkup(reviewState, currentUser) {
+  const summary = reviewState.summary || { averageRating: null, reviewsCount: 0 };
+
+  return `
+    <section class="place-detail-section place-reviews-section">
+      <div class="place-reviews-header">
+        <div>
+          <h3 class="place-detail-section-title place-reviews-title">Отзывы</h3>
+          <p class="place-reviews-subtitle">Реальные впечатления пользователей StudentMap.</p>
+        </div>
+        <div class="place-reviews-summary">
+          <span class="place-reviews-score">${formatAverageRating(summary.averageRating)}</span>
+          <span class="place-reviews-count">${formatReviewsCount(summary.reviewsCount)}</span>
+        </div>
+      </div>
+      ${buildReviewsContentMarkup(reviewState, currentUser)}
+    </section>
+  `;
+}
+
+function buildReviewsContentMarkup(reviewState, currentUser) {
+  if (reviewState.status === 'idle' || reviewState.status === 'loading') {
+    return `
+      <div class="place-reviews-state">
+        <div class="place-reviews-state-title">Загружаем отзывы</div>
+        <div class="place-reviews-state-text">Собираем мнения других пользователей.</div>
+      </div>
+    `;
+  }
+
+  if (reviewState.status === 'error') {
+    return `
+      <div class="place-reviews-state error">
+        <div class="place-reviews-state-title">Не удалось загрузить отзывы</div>
+        <div class="place-reviews-state-text">${escapeHtml(reviewState.error || 'Попробуйте еще раз.')}</div>
+        <button type="button" class="list-state-action" data-action="retry-load-reviews">Повторить</button>
+      </div>
+    `;
+  }
+
+  const reviewsMarkup = reviewState.reviews.length > 0
+    ? `<div class="place-reviews-list">${reviewState.reviews.map(buildSingleReviewMarkup).join('')}</div>`
+    : `
+      <div class="place-reviews-empty">
+        <div class="place-reviews-state-title">Пока нет отзывов</div>
+        <div class="place-reviews-state-text">Станьте первым, кто поделится впечатлением об этом месте.</div>
+      </div>
+    `;
+
+  return `
+    ${reviewsMarkup}
+    ${buildReviewComposerMarkup(reviewState, currentUser)}
+  `;
+}
+
+function buildSingleReviewMarkup(review) {
+  return `
+    <article class="place-review-card ${review.isOwner ? 'owner' : ''}">
+      <div class="place-review-card-header">
+        <div>
+          <div class="place-review-author">${escapeHtml(review.authorName)}</div>
+          <div class="place-review-date">${formatReviewDate(review)}</div>
+        </div>
+        <div class="place-review-rating" aria-label="Оценка ${review.rating} из 5">${renderRatingStars(review.rating)}</div>
+      </div>
+      <p class="place-review-body">${formatReviewBody(review.body)}</p>
+      ${review.isOwner ? `
+        <div class="place-review-owner-row">
+          <div class="place-review-owner">Ваш отзыв</div>
+          <button type="button" class="auth-secondary place-detail-review-edit">Редактировать</button>
+        </div>
+      ` : ''}
+    </article>
+  `;
+}
+
+function buildReviewComposerMarkup(reviewState, currentUser) {
+  if (!currentUser) {
+    return `
+      <div class="place-review-guest">
+        <div class="place-reviews-state-title">Хотите оставить отзыв?</div>
+        <div class="place-reviews-state-text">Войдите в аккаунт, чтобы оценить место и поделиться впечатлением.</div>
+        <button type="button" class="place-detail-login-btn">Войти, чтобы оставить отзыв</button>
+      </div>
+    `;
+  }
+
+  const ownReview = getOwnReview(reviewState);
+  if (ownReview && !reviewState.isEditingOwnReview) {
+    return '';
+  }
+
+  const draft = reviewState.formDraft || createReviewDraft(reviewState);
+  const submitLabel = reviewState.submitting
+    ? (ownReview ? 'Сохраняем...' : 'Публикуем...')
+    : (ownReview ? 'Сохранить отзыв' : 'Опубликовать отзыв');
+
+  return `
+    <div class="place-review-composer">
+      <h4 class="place-review-composer-title">${ownReview ? 'Редактировать отзыв' : 'Оставить отзыв'}</h4>
+      <form class="place-detail-review-form">
+        <label class="place-review-field">
+          <span class="place-review-label">Оценка</span>
+          <select name="rating" class="place-review-select" ${reviewState.submitting ? 'disabled' : ''}>
+            ${buildRatingOptions(draft.rating)}
+          </select>
+        </label>
+        <label class="place-review-field">
+          <span class="place-review-label">Ваш отзыв</span>
+          <textarea name="body" class="place-review-textarea" rows="4" maxlength="500" placeholder="Что понравилось, что важно знать, стоит ли сюда идти?" ${reviewState.submitting ? 'disabled' : ''}>${escapeHtml(draft.body)}</textarea>
+        </label>
+        ${reviewState.formError ? `<div class="place-review-form-error">${escapeHtml(reviewState.formError)}</div>` : ''}
+        <div class="place-review-form-footer">
+          <div class="place-review-form-hint">От 10 до 500 символов. Один отзыв на место.</div>
+          <div class="place-review-form-actions">
+            ${ownReview ? `<button type="button" class="auth-secondary place-detail-review-cancel" ${reviewState.submitting ? 'disabled' : ''}>Отмена</button>` : ''}
+            ${ownReview ? `<button type="button" class="auth-secondary place-detail-review-delete" ${reviewState.submitting ? 'disabled' : ''}>Удалить</button>` : ''}
+            <button type="submit" class="auth-submit" ${reviewState.submitting ? 'disabled' : ''}>${submitLabel}</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  `;
+}
+
+function createReviewDraft(reviewState) {
+  const ownReview = getOwnReview(reviewState);
+
+  return {
+    rating: String(ownReview?.rating || 5),
+    body: ownReview?.body || ''
+  };
+}
+
+function getOwnReview(reviewState) {
+  return reviewState.reviews.find((review) => review.isOwner) || null;
+}
+
+function getCurrentUser() {
+  return window.StudentMapAuth?.getCurrentUser?.() || null;
+}
+
+function buildRatingOptions(selectedRating) {
+  return [5, 4, 3, 2, 1]
+    .map((value) => `<option value="${value}" ${String(selectedRating) === String(value) ? 'selected' : ''}>${value} из 5</option>`)
+    .join('');
+}
+
+function renderRatingStars(rating) {
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
+}
+
+function formatAverageRating(value) {
+  return value === null ? '—' : Number(value).toFixed(1);
+}
+
+function formatReviewsCount(count) {
+  const safeCount = Number(count) || 0;
+  const mod10 = safeCount % 10;
+  const mod100 = safeCount % 100;
+  let word = 'отзывов';
+
+  if (mod10 === 1 && mod100 !== 11) {
+    word = 'отзыв';
+  } else if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    word = 'отзыва';
+  }
+
+  return `${safeCount} ${word}`;
+}
+
+function formatReviewDate(review) {
+  const createdAt = new Date(review.createdAt);
+  const updatedAt = new Date(review.updatedAt);
+  const formatter = new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long'
+  });
+  const label = formatter.format(updatedAt);
+
+  return updatedAt.getTime() > createdAt.getTime() + 1000 ? `Обновлено ${label}` : label;
+}
+
+function formatReviewBody(body) {
+  return escapeHtml(body).replace(/\n/g, '<br>');
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

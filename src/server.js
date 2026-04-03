@@ -4,13 +4,15 @@ const cors = require('cors');
 const path = require('path');
 const placesRoutes = require('./routes/places.routes');
 const authRoutes = require('./routes/auth.routes');
+const reviewsRoutes = require('./routes/reviews.routes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
+app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 
 // Статические файлы (теперь из папки public)
 app.use(express.static(path.join(__dirname, '../public')));
@@ -70,6 +72,7 @@ app.get('/api/route', async (req, res) => {
 
 // General resource routes last
 app.use('/api/auth', authRoutes);
+app.use('/api', reviewsRoutes);
 app.use('/api/places', placesRoutes);
 
 // Запуск сервера

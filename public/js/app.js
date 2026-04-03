@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobilePlaceBackdrop: document.getElementById('mobilePlaceBackdrop'),
     mobilePlaceClose: document.getElementById('mobilePlaceClose'),
     mobilePlaceContent: document.getElementById('mobilePlaceContent'),
+    sidebarAccountPanel: document.getElementById('sidebarAccountPanel'),
     sidebarContent: document.getElementById('sidebarContent'),
     sidebarFilters: document.querySelector('.sidebar-filters')
   };
