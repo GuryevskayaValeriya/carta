@@ -37,6 +37,7 @@ async function getCurrentUser(req, clientOrPool = pool) {
       JOIN users ON users.id = auth_sessions.user_id
       WHERE auth_sessions.token_hash = $1
         AND auth_sessions.expires_at > NOW()
+        AND users.is_active = true
       LIMIT 1
     `,
     [tokenHash]

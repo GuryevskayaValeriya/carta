@@ -220,6 +220,13 @@
   flex-shrink: 0;
 }
 
+.result-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 /* ===== BOTTOM CATEGORIES BAR ===== */
 .bottom-categories {
   position: fixed;
@@ -280,6 +287,11 @@
 .filter-btn-mobile[data-category="all"].active {
   background: #1e293b;
   border-color: #1e293b;
+}
+
+.filter-btn-mobile[data-category="favorite"].active {
+  background: #ef4444;
+  border-color: #ef4444;
 }
 
 .filter-btn-mobile[data-category="food"].active {

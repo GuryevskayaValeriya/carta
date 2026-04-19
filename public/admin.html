@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STUDENTMAP Admin</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <div class="admin-brand-kicker">STUDENTMAP</div>
+        <h1 class="admin-brand-title">Админ-панель</h1>
+        <p class="admin-brand-text">Управление местами, отзывами и пользователями.</p>
+      </div>
+
+      <nav class="admin-nav">
+        <button class="admin-nav-btn active" type="button" data-admin-view="places">
+          <span>Места</span>
+          <span class="admin-nav-count" id="placesNavCount">0</span>
+        </button>
+        <button class="admin-nav-btn" type="button" data-admin-view="reviews">
+          <span>Отзывы</span>
+          <span class="admin-nav-count" id="reviewsNavCount">0</span>
+        </button>
+        <button class="admin-nav-btn" type="button" data-admin-view="users">
+          <span>Пользователи</span>
+          <span class="admin-nav-count" id="usersNavCount">0</span>
+        </button>
+      </nav>
+
+      <div class="admin-sidebar-footer">
+        <a class="admin-link-btn" href="/">Вернуться к карте</a>
+        <button class="admin-link-btn ghost" id="adminLogoutButton" type="button">Выйти</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-header">
+        <div>
+          <div class="admin-header-kicker">Управление проектом</div>
+          <h2 class="admin-header-title" id="adminHeaderTitle">Места</h2>
+        </div>
+        <div class="admin-user-chip" id="adminUserChip"></div>
+      </header>
+
+      <div class="admin-status" id="adminStatus" role="status" aria-live="polite"></div>
+
+      <section class="admin-view active" id="adminPlacesView">
+        <div class="admin-toolbar">
+          <div class="admin-search-box">
+            <input type="search" id="placesSearchInput" placeholder="Поиск по названию или адресу">
+          </div>
+          <button class="admin-primary-btn" id="createPlaceButton" type="button">Добавить место</button>
+        </div>
+        <div class="admin-split-layout">
+          <div class="admin-list" id="placesList"></div>
+          <div class="admin-editor" id="placeEditor"></div>
+        </div>
+      </section>
+
+      <section class="admin-view" id="adminReviewsView">
+        <div class="admin-toolbar">
+          <div class="admin-search-box">
+            <input type="search" id="reviewsSearchInput" placeholder="Поиск по месту, автору или тексту">
+          </div>
+        </div>
+        <div class="admin-split-layout">
+          <div class="admin-list" id="reviewsList"></div>
+          <div class="admin-editor" id="reviewEditor"></div>
+        </div>
+      </section>
+
+      <section class="admin-view" id="adminUsersView">
+        <div class="admin-toolbar">
+          <div class="admin-search-box">
+            <input type="search" id="usersSearchInput" placeholder="Поиск по имени или почте">
+          </div>
+        </div>
+        <div class="admin-split-layout">
+          <div class="admin-list" id="usersList"></div>
+          <div class="admin-editor" id="userEditor"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

@@ -23,6 +23,8 @@ CREATE TABLE IF NOT EXISTS users (
   first_name TEXT NOT NULL,
   last_name TEXT,
   avatar_data TEXT,
+  role TEXT NOT NULL DEFAULT 'user',
+  is_active BOOLEAN NOT NULL DEFAULT true,
   password_hash TEXT NOT NULL,
   email_verified BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -32,12 +34,24 @@ CREATE TABLE IF NOT EXISTS users (
 ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name TEXT;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_data TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN;
 
 UPDATE users
 SET first_name = 'Пользователь'
 WHERE first_name IS NULL OR BTRIM(first_name) = '';
 
+UPDATE users
+SET role = 'user'
+WHERE role IS NULL OR BTRIM(role) = '';
+
+UPDATE users
+SET is_active = true
+WHERE is_active IS NULL;
+
 ALTER TABLE users ALTER COLUMN first_name SET NOT NULL;
+ALTER TABLE users ALTER COLUMN role SET NOT NULL;
+ALTER TABLE users ALTER COLUMN is_active SET NOT NULL;
 
 CREATE TABLE IF NOT EXISTS email_verifications (
   id BIGSERIAL PRIMARY KEY,
@@ -69,6 +83,13 @@ CREATE TABLE IF NOT EXISTS place_reviews (
   UNIQUE (place_id, user_id)
 );
 
+CREATE TABLE IF NOT EXISTS place_favorites (
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  place_id TEXT NOT NULL REFERENCES places(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (user_id, place_id)
+);
+
 CREATE INDEX IF NOT EXISTS idx_email_verifications_user_id
   ON email_verifications(user_id);
 
@@ -86,3 +107,9 @@ CREATE INDEX IF NOT EXISTS idx_place_reviews_place_id_created_at
 
 CREATE INDEX IF NOT EXISTS idx_place_reviews_user_id
   ON place_reviews(user_id);
+
+CREATE INDEX IF NOT EXISTS idx_place_favorites_user_id_created_at
+  ON place_favorites(user_id, created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_place_favorites_place_id
+  ON place_favorites(place_id);

@@ -5,6 +5,7 @@ import { createRouteController } from './route-controller.js';
 const API_BASE_URL = '/api';
 
 const categoriesConfig = {
+  favorite: { emoji: '❤', name: 'Избранное', color: '#ef4444' },
   food: { emoji: '🍜', name: 'Еда', color: '#fbbf24' },
   fun: { emoji: '🎉', name: 'Досуг', color: '#8b5cf6' },
   study: { emoji: '📚', name: 'Учёба', color: '#34d399' },
@@ -41,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     mobilePlaceClose: document.getElementById('mobilePlaceClose'),
     mobilePlaceContent: document.getElementById('mobilePlaceContent'),
     sidebarAccountPanel: document.getElementById('sidebarAccountPanel'),
+    sidebarTitle: document.getElementById('sidebarTitle'),
     sidebarContent: document.getElementById('sidebarContent'),
     sidebarFilters: document.querySelector('.sidebar-filters')
   };
@@ -84,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     categoriesConfig,
     elements,
     mapController,
-    routeController
+    routeController,
+    onStatusMessage: showAppStatus
   });
 
   routeController.setPlaceViewHandlers({

@@ -19,7 +19,7 @@ let appStatusTimer = null;
 
 window.StudentMapAuth = {
   getCurrentUser: () => authState.currentUser,
-  openAuthModal: () => openAuthModal()
+  openAuthModal: (preferredView) => openAuthModal(preferredView)
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -72,7 +72,13 @@ function bindAuthElements() {
   authElements.profileForms = Array.from(document.querySelectorAll('[data-account-profile-form]'));
   authElements.profileMessages = Array.from(document.querySelectorAll('[data-profile-message]'));
   authElements.profileAvatarInputs = Array.from(document.querySelectorAll('[data-profile-avatar-input]'));
+  authElements.profileAvatarStatuses = Array.from(document.querySelectorAll('[data-avatar-status]'));
+  authElements.profileAvatarButtons = Array.from(document.querySelectorAll('.account-avatar-button'));
   authElements.removeAvatarButtons = Array.from(document.querySelectorAll('[data-action="remove-avatar"]'));
+  authElements.desktopAdminSection = document.getElementById('desktopAdminSection');
+  authElements.mobileAdminSection = document.getElementById('mobileAdminSection');
+  authElements.desktopAdminLink = document.getElementById('desktopAdminLink');
+  authElements.mobileAdminLink = document.getElementById('mobileAdminLink');
 
   authElements.desktopLogoutButton = document.getElementById('desktopLogoutButton');
   authElements.mobileLogoutButton = document.getElementById('mobileLogoutButton');
@@ -225,7 +231,10 @@ function updateCurrentUser(user) {
     syncProfileForms();
     clearProfileMessage();
     updateRemoveAvatarButtons();
+    updateAvatarStatusTexts();
+    updateAdminLinksVisibility(false);
     applyProfilePresentation(createUserPresentation(user));
+    syncAdminVisibility();
     dispatchAuthChange();
     return;
   }
@@ -236,6 +245,8 @@ function updateCurrentUser(user) {
   syncProfileForms();
   clearProfileMessage();
   updateRemoveAvatarButtons();
+  updateAvatarStatusTexts();
+  updateAdminLinksVisibility(false);
   applyProfilePresentation({
     displayName: '',
     email: '',
@@ -247,6 +258,31 @@ function updateCurrentUser(user) {
   closeDesktopAccountPanel();
   closeMobileAccountSettings();
   dispatchAuthChange();
+}
+
+function updateAdminLinksVisibility(isVisible) {
+  [authElements.desktopAdminSection, authElements.mobileAdminSection].forEach((element) => {
+    if (element) {
+      element.hidden = !isVisible;
+    }
+  });
+}
+
+async function syncAdminVisibility() {
+  if (!authState.currentUser) {
+    updateAdminLinksVisibility(false);
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/admin/me', {
+      credentials: 'same-origin'
+    });
+
+    updateAdminLinksVisibility(response.ok);
+  } catch (error) {
+    updateAdminLinksVisibility(false);
+  }
 }
 
 function resetProfileDraft() {
@@ -277,6 +313,7 @@ function syncProfileForms(sourceForm) {
   });
 
   clearAvatarInputs();
+  updateAvatarStatusTexts();
 }
 
 function createUserPresentation(user) {
@@ -414,13 +451,13 @@ function clearProfileMessage() {
   });
 }
 
-function openAuthModal() {
+function openAuthModal(preferredView) {
   closeDesktopAccountPanel();
   closeMobileAccountSettings();
   authElements.authModal?.classList.add('visible');
   document.body.classList.add('auth-open');
   clearAuthMessage();
-  setAuthView(authState.activeView === 'verify' ? 'verify' : authState.activeView);
+  setAuthView(preferredView || (authState.activeView === 'verify' ? 'verify' : authState.activeView));
 }
 
 function closeAuthModal() {
@@ -679,6 +716,7 @@ function handleProfileFieldInput(event) {
 
   syncProfileForms(sourceForm);
   updateRemoveAvatarButtons();
+  updateAvatarStatusTexts();
   if (authState.currentUser) {
     applyProfilePresentation(createDraftPresentation());
   }
@@ -708,6 +746,7 @@ async function handleProfileAvatarChange(event) {
     authState.profileDraft.avatarData = await readFileAsDataUrl(file);
     authState.profileDraft.avatarDirty = true;
     updateRemoveAvatarButtons();
+    updateAvatarStatusTexts(file.name);
     if (authState.currentUser) {
       applyProfilePresentation(createDraftPresentation());
     }
@@ -723,6 +762,7 @@ function handleProfileAvatarRemove() {
   authState.profileDraft.avatarData = '';
   authState.profileDraft.avatarDirty = true;
   updateRemoveAvatarButtons();
+  updateAvatarStatusTexts();
   clearProfileMessage();
 
   if (authState.currentUser) {
@@ -863,6 +903,21 @@ function updateRemoveAvatarButtons() {
   });
 }
 
+function updateAvatarStatusTexts(fileName) {
+  const statusText = getAvatarStatusText(fileName);
+  authElements.profileAvatarStatuses.forEach((element) => {
+    element.textContent = statusText;
+  });
+}
+
+function getAvatarStatusText(fileName) {
+  if (fileName) {
+    return `Выбрано: ${fileName}`;
+  }
+
+  return getProfileAvatarData() ? 'Фото профиля установлено' : 'Фото пока не выбрано';
+}
+
 function clearAvatarInputs() {
   authElements.profileAvatarInputs.forEach((input) => {
     input.value = '';
@@ -876,8 +931,13 @@ function setProfileBusy(isBusy) {
     });
   });
 
+  authElements.profileAvatarButtons.forEach((button) => {
+    button.classList.toggle('is-disabled', isBusy);
+  });
+
   if (!isBusy) {
     updateRemoveAvatarButtons();
+    updateAvatarStatusTexts();
   }
 }
 

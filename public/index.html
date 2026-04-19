@@ -56,6 +56,10 @@
         <span class="filter-icon">📍</span>
         <span class="filter-label">Все</span>
       </button>
+      <button class="filter-btn-mobile favorite" data-category="favorite">
+        <span class="filter-icon">❤</span>
+        <span class="filter-label">Избранное</span>
+      </button>
       <button class="filter-btn-mobile" data-category="food">
         <span class="filter-icon">🍜</span>
         <span class="filter-label">Еда</span>
@@ -89,6 +93,7 @@
 
       <div class="sidebar-filters">
         <button class="filter-btn active all" data-category="all">Все</button>
+        <button class="filter-btn favorite" data-category="favorite">Избранное</button>
         <button class="filter-btn food" data-category="food">Еда</button>
         <button class="filter-btn fun" data-category="fun">Досуг</button>
         <button class="filter-btn study" data-category="study">Учёба</button>
@@ -133,6 +138,13 @@
             <div class="auth-profile-email" id="desktopProfileEmail"></div>
             <div class="auth-profile-status" id="desktopProfileStatus"></div>
           </div>
+          <div class="account-admin-section" id="desktopAdminSection" hidden>
+            <div class="account-admin-copy">
+              <div class="account-admin-title">Режим администратора</div>
+              <p class="account-admin-text">Откройте панель управления местами, отзывами и пользователями.</p>
+            </div>
+            <a class="auth-secondary account-admin-link" id="desktopAdminLink" href="/admin">Открыть админ-панель</a>
+          </div>
           <div class="account-settings-section">
             <div class="account-settings-title">Настройки аккаунта</div>
             <p class="account-settings-text">Здесь можно обновить имя, фамилию и аватарку профиля.</p>
@@ -145,14 +157,20 @@
                 <span>Фамилия</span>
                 <input name="lastName" type="text" placeholder="Необязательно">
               </label>
-              <label class="auth-field account-avatar-field">
-                <span>Аватарка</span>
-                <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
-              </label>
+              <div class="account-avatar-picker">
+                <div class="account-avatar-copy">
+                  <div class="account-avatar-label">Аватарка</div>
+                  <div class="account-avatar-status" data-avatar-status>Фото пока не выбрано</div>
+                </div>
+                <label class="account-avatar-button">
+                  <input class="account-avatar-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
+                  <span>Выбрать фото</span>
+                </label>
+                <button class="account-avatar-remove" type="button" data-action="remove-avatar">Убрать фото</button>
+              </div>
               <div class="account-profile-hint">Поддерживаются PNG, JPG, WEBP и GIF до 1 МБ.</div>
               <div class="auth-message account-profile-message" data-profile-message></div>
               <div class="account-profile-actions">
-                <button class="auth-secondary" type="button" data-action="remove-avatar">Убрать аватарку</button>
                 <button class="auth-submit" type="submit">Сохранить профиль</button>
               </div>
             </form>
@@ -162,7 +180,7 @@
       </div>
 
       <div class="sidebar-content" id="sidebarContent">
-        <h2 class="sidebar-title">📍 Места</h2>
+        <h2 class="sidebar-title" id="sidebarTitle">📍 Места</h2>
         <div id="placesContainer"></div>
       </div>
     </aside>
@@ -303,6 +321,13 @@
         <div class="auth-profile-email" id="mobileProfileEmail"></div>
         <div class="auth-profile-status" id="mobileProfileStatus"></div>
       </div>
+      <div class="account-admin-section mobile" id="mobileAdminSection" hidden>
+        <div class="account-admin-copy">
+          <div class="account-admin-title">Режим администратора</div>
+          <p class="account-admin-text">Откройте панель управления проектом в отдельной странице.</p>
+        </div>
+        <a class="auth-secondary account-admin-link" id="mobileAdminLink" href="/admin">Открыть админ-панель</a>
+      </div>
       <form class="account-profile-form" data-account-profile-form>
         <label class="auth-field">
           <span>Имя</span>
@@ -312,18 +337,27 @@
           <span>Фамилия</span>
           <input name="lastName" type="text" placeholder="Необязательно">
         </label>
-        <label class="auth-field account-avatar-field">
-          <span>Аватарка</span>
-          <input name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
-        </label>
+        <div class="account-avatar-picker mobile-compact">
+          <div class="account-avatar-copy">
+            <div class="account-avatar-label">Аватарка</div>
+            <div class="account-avatar-status" data-avatar-status>Фото пока не выбрано</div>
+          </div>
+          <label class="account-avatar-button">
+            <input class="account-avatar-input" name="avatar" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-profile-avatar-input>
+            <span>Выбрать фото</span>
+          </label>
+          <button class="account-avatar-remove" type="button" data-action="remove-avatar">Убрать фото</button>
+        </div>
         <div class="account-profile-hint">Поддерживаются PNG, JPG, WEBP и GIF до 1 МБ.</div>
         <div class="auth-message account-profile-message" data-profile-message></div>
         <div class="account-profile-actions">
-          <button class="auth-secondary" type="button" data-action="remove-avatar">Убрать аватарку</button>
           <button class="auth-submit" type="submit">Сохранить профиль</button>
         </div>
       </form>
-      <button class="auth-submit danger" id="mobileLogoutButton" type="button">Выйти</button>
+      <div class="account-logout-section">
+        <div class="account-logout-note">Выйти из аккаунта можно в любой момент.</div>
+        <button class="auth-submit danger" id="mobileLogoutButton" type="button">Выйти</button>
+      </div>
     </div>
   </div>
 

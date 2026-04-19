@@ -2,9 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const adminRoutes = require('./routes/admin.routes');
 const placesRoutes = require('./routes/places.routes');
 const authRoutes = require('./routes/auth.routes');
+const favoritesRoutes = require('./routes/favorites.routes');
 const reviewsRoutes = require('./routes/reviews.routes');
+const { resolveAdminAccess } = require('./utils/admin');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,6 +16,36 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+app.get('/admin', async (req, res) => {
+  try {
+    const access = await resolveAdminAccess(req);
+
+    if (!access.isAdmin) {
+      return res.redirect('/');
+    }
+
+    return res.sendFile(path.join(__dirname, '../public/admin.html'));
+  } catch (error) {
+    console.error('Failed to open admin panel:', error);
+    return res.redirect('/');
+  }
+});
+
+app.get('/admin.html', async (req, res) => {
+  try {
+    const access = await resolveAdminAccess(req);
+
+    if (!access.isAdmin) {
+      return res.redirect('/');
+    }
+
+    return res.sendFile(path.join(__dirname, '../public/admin.html'));
+  } catch (error) {
+    console.error('Failed to open admin panel:', error);
+    return res.redirect('/');
+  }
+});
 
 // Статические файлы (теперь из папки public)
 app.use(express.static(path.join(__dirname, '../public')));
@@ -72,6 +105,8 @@ app.get('/api/route', async (req, res) => {
 
 // General resource routes last
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api', favoritesRoutes);
 app.use('/api', reviewsRoutes);
 app.use('/api/places', placesRoutes);
 

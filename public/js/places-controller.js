@@ -3,7 +3,8 @@ export function createPlacesController({
   categoriesConfig,
   elements,
   mapController,
-  routeController
+  routeController,
+  onStatusMessage
 }) {
   let places = [];
   let filteredPlaces = [];
@@ -13,12 +14,17 @@ export function createPlacesController({
   let placesState = 'loading';
   let placesErrorMessage = '';
   let mobileResultsOpen = false;
+  let favoritesStatus = 'idle';
+  let favoritesLoadedForUserId = null;
+  let favoritePlaceIds = new Set();
+  const favoritePendingIds = new Set();
   const reviewsByPlaceId = {};
 
   function init() {
     setupEventListeners();
     renderAll();
     loadPlaces();
+    syncFavoritesWithAuth();
   }
 
   async function loadPlaces() {
@@ -42,6 +48,53 @@ export function createPlacesController({
       placesState = 'error';
       placesErrorMessage = 'Не удалось загрузить места. Проверьте соединение и попробуйте снова.';
       renderAll();
+    }
+  }
+
+  async function syncFavoritesWithAuth({ force = false } = {}) {
+    const currentUser = getCurrentUser();
+    const currentUserId = currentUser?.id || null;
+
+    if (!currentUserId) {
+      favoritePlaceIds = new Set();
+      favoritesLoadedForUserId = null;
+      favoritesStatus = 'ready';
+
+      if (currentCategory === 'favorite') {
+        updateCategorySelection('all');
+        currentCategory = 'all';
+      }
+
+      filterPlaces();
+      return;
+    }
+
+    if (!force && favoritesStatus === 'ready' && favoritesLoadedForUserId === currentUserId) {
+      return;
+    }
+
+    favoritesStatus = 'loading';
+    favoritesLoadedForUserId = currentUserId;
+    renderAll();
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/me/favorites`, {
+        credentials: 'same-origin'
+      });
+      const data = await readJsonResponse(response);
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Не удалось загрузить избранное');
+      }
+
+      favoritePlaceIds = new Set(Array.isArray(data.placeIds) ? data.placeIds : []);
+      favoritesStatus = 'ready';
+      filterPlaces();
+    } catch (error) {
+      console.error('Failed to load favorites:', error);
+      favoritesStatus = 'error';
+      favoritePlaceIds = new Set();
+      filterPlaces();
     }
   }
 
@@ -92,12 +145,12 @@ export function createPlacesController({
     });
 
     window.addEventListener('studentmap:auth-changed', () => {
-      if (!activePlace) {
-        return;
-      }
+      syncFavoritesWithAuth({ force: true });
 
-      renderPlaceDetails();
-      ensurePlaceReviews(activePlace.id, { force: true });
+      if (activePlace) {
+        renderPlaceDetails();
+        ensurePlaceReviews(activePlace.id, { force: true });
+      }
     });
 
     document.addEventListener('click', (event) => {
@@ -115,9 +168,7 @@ export function createPlacesController({
     });
   }
 
-  function setCategory(category) {
-    currentCategory = category;
-
+  function updateCategorySelection(category) {
     document.querySelectorAll('.filter-btn').forEach((button) => {
       button.classList.toggle('active', button.dataset.category === category);
     });
@@ -125,6 +176,30 @@ export function createPlacesController({
     document.querySelectorAll('.filter-btn-mobile').forEach((button) => {
       button.classList.toggle('active', button.dataset.category === category);
     });
+  }
+
+  function updateSidebarTitle() {
+    if (!elements.sidebarTitle) {
+      return;
+    }
+
+    if (currentCategory === 'favorite') {
+      elements.sidebarTitle.textContent = '❤ Избранное';
+      return;
+    }
+
+    elements.sidebarTitle.textContent = '📍 Места';
+  }
+
+  function setCategory(category) {
+    if (category === 'favorite' && !getCurrentUser()) {
+      window.StudentMapAuth?.openAuthModal?.('register');
+      onStatusMessage?.('Войдите, чтобы сохранять места в избранное.', 'info');
+      return;
+    }
+
+    currentCategory = category;
+    updateCategorySelection(category);
 
     if (window.innerWidth <= 768) {
       mobileResultsOpen = true;
@@ -154,7 +229,9 @@ export function createPlacesController({
 
   function filterPlaces() {
     filteredPlaces = places.filter((place) => {
-      const matchesCategory = currentCategory === 'all' || place.category === currentCategory;
+      const matchesCategory =
+        currentCategory === 'all' ||
+        (currentCategory === 'favorite' ? favoritePlaceIds.has(place.id) : place.category === currentCategory);
       const matchesSearch =
         !currentSearch ||
         place.name.toLowerCase().includes(currentSearch) ||
@@ -173,6 +250,7 @@ export function createPlacesController({
 
   function renderAll() {
     mapController.updateMarkers(placesState === 'ready' ? filteredPlaces : [], activePlace?.id);
+    updateSidebarTitle();
     renderSidebarList();
     renderMobileResults();
     renderPlaceDetails();
@@ -206,10 +284,32 @@ export function createPlacesController({
       return;
     }
 
+    if (currentCategory === 'favorite' && favoritesStatus === 'loading') {
+      elements.placesContainer.innerHTML = createStateMarkup({
+        title: 'Загружаем избранное',
+        description: 'Собираем сохраненные места вашего аккаунта.',
+        tone: 'info'
+      });
+      return;
+    }
+
+    if (currentCategory === 'favorite' && favoritesStatus === 'error') {
+      elements.placesContainer.innerHTML = createStateMarkup({
+        title: 'Не удалось загрузить избранное',
+        description: 'Попробуйте обновить список или открыть раздел позже.',
+        tone: 'error',
+        actionLabel: 'Повторить'
+      });
+      bindFavoritesRetryAction(elements.placesContainer);
+      return;
+    }
+
     if (filteredPlaces.length === 0) {
       elements.placesContainer.innerHTML = createStateMarkup({
-        title: 'Ничего не найдено',
-        description: 'Измените категорию или очистите поиск, чтобы увидеть больше мест.',
+        title: currentCategory === 'favorite' ? 'В избранном пока пусто' : 'Ничего не найдено',
+        description: currentCategory === 'favorite'
+          ? 'Сохраняйте понравившиеся места, чтобы они появились в этом разделе.'
+          : 'Измените категорию или очистите поиск, чтобы увидеть больше мест.',
         tone: 'empty'
       });
       return;
@@ -223,12 +323,20 @@ export function createPlacesController({
       card.innerHTML = `
         <div class="place-card-header">
           <h3 class="place-name">${place.name}</h3>
-          <span class="place-category-badge" style="background:${category.color}">${category.emoji}</span>
+          <div class="place-card-actions">
+            ${buildFavoriteButtonMarkup(place.id, {
+              isFavorite: favoritePlaceIds.has(place.id),
+              isPending: favoritePendingIds.has(place.id),
+              compact: true
+            })}
+            <span class="place-category-badge" style="background:${category.color}">${category.emoji}</span>
+          </div>
         </div>
         <div class="place-address">📍 ${place.address}</div>
         <div class="place-price">💰 ${formatPrice(place.price)} • 🕐 ${place.hours}</div>
       `;
 
+      card.querySelector('.favorite-toggle-btn')?.addEventListener('click', handleFavoriteToggle);
       card.addEventListener('click', () => {
         handlePlaceSelect(place);
       });
@@ -269,10 +377,32 @@ export function createPlacesController({
       return;
     }
 
+    if (currentCategory === 'favorite' && favoritesStatus === 'loading') {
+      elements.mobileResultsList.innerHTML = createStateMarkup({
+        title: 'Загружаем избранное',
+        description: 'Собираем сохраненные места вашего аккаунта.',
+        tone: 'info'
+      });
+      return;
+    }
+
+    if (currentCategory === 'favorite' && favoritesStatus === 'error') {
+      elements.mobileResultsList.innerHTML = createStateMarkup({
+        title: 'Не удалось загрузить избранное',
+        description: 'Попробуйте повторить загрузку позже.',
+        tone: 'error',
+        actionLabel: 'Повторить'
+      });
+      bindFavoritesRetryAction(elements.mobileResultsList);
+      return;
+    }
+
     if (filteredPlaces.length === 0) {
       elements.mobileResultsList.innerHTML = createStateMarkup({
-        title: 'Ничего не найдено',
-        description: 'Попробуйте другую категорию или измените запрос.',
+        title: currentCategory === 'favorite' ? 'В избранном пока пусто' : 'Ничего не найдено',
+        description: currentCategory === 'favorite'
+          ? 'Нажимайте на сердечки у мест, чтобы быстро найти их здесь.'
+          : 'Попробуйте другую категорию или измените запрос.',
         tone: 'empty'
       });
       return;
@@ -289,9 +419,17 @@ export function createPlacesController({
           <div class="result-name">${place.name}</div>
           <div class="result-address">${place.address}</div>
         </div>
-        <div class="result-meta">${formatPrice(place.price)}</div>
+        <div class="result-actions">
+          ${buildFavoriteButtonMarkup(place.id, {
+            isFavorite: favoritePlaceIds.has(place.id),
+            isPending: favoritePendingIds.has(place.id),
+            compact: true
+          })}
+          <div class="result-meta">${formatPrice(place.price)}</div>
+        </div>
       `;
 
+      item.querySelector('.favorite-toggle-btn')?.addEventListener('click', handleFavoriteToggle);
       item.addEventListener('click', () => {
         handlePlaceSelect(place);
       });
@@ -333,6 +471,12 @@ export function createPlacesController({
     });
   }
 
+  function bindFavoritesRetryAction(container) {
+    container.querySelector('[data-action="retry-load-places"]')?.addEventListener('click', () => {
+      syncFavoritesWithAuth({ force: true });
+    });
+  }
+
   function renderPlaceDetails() {
     if (!activePlace) {
       if (elements.sidebarPlaceContent) {
@@ -353,7 +497,9 @@ export function createPlacesController({
       place: activePlace,
       category,
       reviewState,
-      currentUser
+      currentUser,
+      isFavorite: favoritePlaceIds.has(activePlace.id),
+      isFavoritePending: favoritePendingIds.has(activePlace.id)
     });
 
     if (elements.sidebarPlaceContent) {
@@ -373,6 +519,8 @@ export function createPlacesController({
         routeController.openRouteModal(activePlace);
       }
     });
+
+    container.querySelector('.favorite-toggle-btn')?.addEventListener('click', handleFavoriteToggle);
 
     container.querySelector('.place-detail-review-edit')?.addEventListener('click', handleReviewEditStart);
     container.querySelector('.place-detail-review-cancel')?.addEventListener('click', handleReviewEditCancel);
@@ -416,6 +564,73 @@ export function createPlacesController({
     reviewState.formError = '';
     reviewState.formDraft = createReviewDraft(reviewState);
     renderPlaceDetails();
+  }
+
+  async function handleFavoriteToggle(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const placeId = event.currentTarget.dataset.placeId;
+    if (!placeId || favoritePendingIds.has(placeId)) {
+      return;
+    }
+
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      window.StudentMapAuth?.openAuthModal?.('register');
+      onStatusMessage?.('Войдите или зарегистрируйтесь, чтобы сохранять места.', 'info');
+      return;
+    }
+
+    const wasFavorite = favoritePlaceIds.has(placeId);
+    favoritePendingIds.add(placeId);
+
+    if (wasFavorite) {
+      favoritePlaceIds.delete(placeId);
+    } else {
+      favoritePlaceIds.add(placeId);
+    }
+
+    filterPlaces();
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/places/${encodeURIComponent(placeId)}/favorite`, {
+        method: wasFavorite ? 'DELETE' : 'POST',
+        credentials: 'same-origin'
+      });
+      const data = await readJsonResponse(response);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          window.StudentMapAuth?.openAuthModal?.('register');
+        }
+        throw new Error(data.error || 'Не удалось обновить избранное');
+      }
+
+      if (data.isFavorite) {
+        favoritePlaceIds.add(placeId);
+      } else {
+        favoritePlaceIds.delete(placeId);
+      }
+
+      onStatusMessage?.(
+        data.isFavorite ? 'Место сохранено в избранное.' : 'Место убрано из избранного.',
+        'success'
+      );
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+
+      if (wasFavorite) {
+        favoritePlaceIds.add(placeId);
+      } else {
+        favoritePlaceIds.delete(placeId);
+      }
+
+      onStatusMessage?.(error.message || 'Не удалось обновить избранное.', 'error');
+    } finally {
+      favoritePendingIds.delete(placeId);
+      filterPlaces();
+    }
   }
 
   async function handleReviewSubmit(event) {
@@ -735,12 +950,8 @@ function formatPrice(price) {
   return `${price.min}–${price.max}₽`;
 }
 
-function buildPlaceDetailMarkup({ place, category, reviewState, currentUser }) {
+function buildPlaceDetailMarkup({ place, category, reviewState, currentUser, isFavorite, isFavoritePending }) {
   const links = [];
-
-  if (place.links?.map) {
-    links.push('<a class="place-detail-link" href="' + place.links.map + '" target="_blank" rel="noreferrer">Открыть в 2GIS</a>');
-  }
 
   if (place.links?.website) {
     links.push('<a class="place-detail-link secondary" href="' + place.links.website + '" target="_blank" rel="noreferrer">Сайт</a>');
@@ -753,6 +964,11 @@ function buildPlaceDetailMarkup({ place, category, reviewState, currentUser }) {
         <div class="place-detail-headline">
           <div class="place-detail-topline">
             <span class="place-detail-category">${category.name}</span>
+            ${buildFavoriteButtonMarkup(place.id, {
+              isFavorite,
+              isPending: isFavoritePending,
+              compact: true
+            })}
           </div>
           <h2 class="place-detail-title">${place.name}</h2>
         </div>
@@ -779,7 +995,7 @@ function buildPlaceDetailMarkup({ place, category, reviewState, currentUser }) {
 
       ${links.length > 0 ? `<div class="place-detail-links">${links.join('')}</div>` : ''}
 
-      <div class="place-detail-actions">
+      <div class="place-detail-actions place-detail-actions-stack">
         <button type="button" class="place-detail-route-btn">Построить маршрут</button>
       </div>
     </article>
@@ -980,4 +1196,43 @@ function escapeHtml(value) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function buildFavoriteButtonMarkup(placeId, { isFavorite, isPending, compact = false, fullWidth = false }) {
+  const label = isFavorite ? 'Убрать из избранного' : 'Добавить в избранное';
+  const classes = [
+    'favorite-toggle-btn',
+    isFavorite ? 'active' : '',
+    compact ? 'compact' : '',
+    fullWidth ? 'full-width' : ''
+  ].filter(Boolean).join(' ');
+
+  return `
+    <button
+      type="button"
+      class="${classes}"
+      data-place-id="${placeId}"
+      aria-pressed="${isFavorite ? 'true' : 'false'}"
+      aria-label="${label}"
+      title="${label}"
+      ${isPending ? 'disabled' : ''}
+    >
+      <span class="favorite-toggle-icon" aria-hidden="true">${isFavorite ? '❤' : '♡'}</span>
+      ${compact ? '' : `<span class="favorite-toggle-text">${isFavorite ? 'В избранном' : 'В избранное'}</span>`}
+    </button>
+  `;
+}
+
+async function readJsonResponse(response) {
+  const text = await response.text();
+
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return {};
+  }
 }

@@ -4,7 +4,6 @@ function validatePlacesData(places) {
   const errors = [];
   const warnings = [];
   const seenIds = new Map();
-  const seenMapLinks = new Map();
 
   if (!Array.isArray(places)) {
     return {
@@ -71,27 +70,6 @@ function validatePlacesData(places) {
 
     if (place.links && typeof place.links !== 'object') {
       errors.push(`${entryLabel}: links must be an object when provided.`);
-    }
-
-    if (place.links?.map) {
-      const mapLink = String(place.links.map).trim();
-
-      try {
-        const parsed = new URL(mapLink);
-        if (!parsed.protocol.startsWith('http')) {
-          errors.push(`${entryLabel}: links.map must use http/https.`);
-        }
-      } catch (error) {
-        errors.push(`${entryLabel}: links.map is not a valid URL.`);
-      }
-
-      if (seenMapLinks.has(mapLink)) {
-        warnings.push(
-          `${entryLabel}: links.map duplicates entry #${seenMapLinks.get(mapLink)} (${mapLink}).`
-        );
-      } else {
-        seenMapLinks.set(mapLink, index + 1);
-      }
     }
 
     if (place.tips && !Array.isArray(place.tips)) {

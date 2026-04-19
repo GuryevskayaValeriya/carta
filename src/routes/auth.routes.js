@@ -12,6 +12,7 @@ const {
   verifyPassword
 } = require('../utils/auth');
 const { isMailConfigured, sendVerificationCodeEmail } = require('../utils/mail');
+const { promoteConfiguredAdminIfNeeded } = require('../utils/admin');
 const { getCurrentUser, parseCookies, SESSION_COOKIE_NAME } = require('../utils/session');
 
 const router = express.Router();
@@ -64,6 +65,8 @@ function sanitizeUser(user) {
     lastName: user.last_name || '',
     avatarData: user.avatar_data || '',
     displayName,
+    role: user.role || 'user',
+    isActive: user.is_active !== false,
     isVerified: Boolean(user.email_verified),
     createdAt: user.created_at
   };
@@ -125,7 +128,8 @@ router.get('/me', async (req, res) => {
       return res.status(401).json({ user: null });
     }
 
-    return res.json({ user: sanitizeUser(user) });
+    const effectiveUser = await promoteConfiguredAdminIfNeeded(pool, user);
+    return res.json({ user: sanitizeUser(effectiveUser) });
   } catch (error) {
     console.error('Failed to resolve current user:', error);
     return res.status(500).json({ error: 'Не удалось загрузить данные пользователя' });
@@ -166,7 +170,8 @@ router.patch('/me', async (req, res) => {
       [user.id, firstName, lastName || null, avatarValidation.value]
     );
 
-    return res.json({ user: sanitizeUser(result.rows[0]) });
+    const effectiveUser = await promoteConfiguredAdminIfNeeded(pool, result.rows[0]);
+    return res.json({ user: sanitizeUser(effectiveUser) });
   } catch (error) {
     console.error('Profile update failed:', error);
     return res.status(500).json({ error: 'Не удалось обновить профиль' });
@@ -395,11 +400,12 @@ router.post('/verify-email', async (req, res) => {
       [user.id]
     );
 
+    const effectiveUser = await promoteConfiguredAdminIfNeeded(client, updatedUserResult.rows[0]);
     const { token } = await createSessionForUser(client, user.id);
     await client.query('COMMIT');
 
     setSessionCookie(res, token);
-    return res.json({ user: sanitizeUser(updatedUserResult.rows[0]) });
+    return res.json({ user: sanitizeUser(effectiveUser) });
   } catch (error) {
     if (client) {
       await client.query('ROLLBACK');
@@ -435,6 +441,12 @@ router.post('/login', async (req, res) => {
     }
 
     const user = userResult.rows[0];
+
+    if (user.is_active === false) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'Аккаунт отключен администратором' });
+    }
+
     const isValidPassword = await verifyPassword(password, user.password_hash);
 
     if (!isValidPassword) {
@@ -447,11 +459,12 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Сначала подтвердите почту' });
     }
 
+    const effectiveUser = await promoteConfiguredAdminIfNeeded(client, user);
     const { token } = await createSessionForUser(client, user.id);
     await client.query('COMMIT');
 
     setSessionCookie(res, token);
-    return res.json({ user: sanitizeUser(user) });
+    return res.json({ user: sanitizeUser(effectiveUser) });
   } catch (error) {
     if (client) {
       await client.query('ROLLBACK');
