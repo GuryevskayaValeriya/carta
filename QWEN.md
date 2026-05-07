@@ -94,8 +94,7 @@ npm run dev               # Режим разработки (то же само�
 | `lng` | REAL | Долгота |
 | `discount` | TEXT | Скидки |
 | `tips` | TEXT (JSON) | Советы/лайфхаки (массив) |
-| `links` | TEXT (JSON) | Ссылки (map, website) |
-| `verified` | BOOLEAN | Проверенное место |
+| `links` | TEXT (JSON) | Ссылки (website) |
 
 ### Категории мест
 

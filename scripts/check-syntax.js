@@ -51,6 +51,6 @@ console.log(`[syntax:ok] validated ${filesToCheck.length} files`);
 function normalizeModuleSyntax(source) {
   return source
     .replace(/^\s*import\s+.+?;?\s*$/gm, '')
-    .replace(/^\s*export\s+default\s+/gm, '')
-    .replace(/^\s*export\s+(?=(async\s+function|function|const|let|var|class))/gm, '');
+    .replace(/^\s*export\s+(default\s+)?/gm, '')
+    .replace(/^\s*export\s*$/gm, '');
 }

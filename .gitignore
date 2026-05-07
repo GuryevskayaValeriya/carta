@@ -7,12 +7,13 @@ carta.db
 # Зависимости Node.js
 node_modules/
 
-# Lock файл (можно коммитить, но если не нужен — игнорируем)
-# package-lock.json
+# Lock файл
+package-lock.json
 
 # Логи
 *.log
 npm-debug.log*
+npm-error.log
 
 # Операционные системы
 .DS_Store
@@ -28,5 +29,12 @@ desktop.ini
 *.tmp
 *.temp
 
-# Ошибки npm
-npm-error.log
+# AI/агент файлы
+AGENTS.md
+DEPLOY.md
+QWEN.md
+.qwen/
+
+# Smoke test output
+server-smoke.err
+server-smoke.out

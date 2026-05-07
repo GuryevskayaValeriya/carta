@@ -1,4 +1,4 @@
-export function createPlacesController({
+function createPlacesController({
   apiBaseUrl,
   categoriesConfig,
   elements,
@@ -19,40 +19,14 @@ export function createPlacesController({
   let favoritePlaceIds = new Set();
   const favoritePendingIds = new Set();
   const reviewsByPlaceId = {};
-  let ignoreHashChange = false;
 
   function init() {
     setupEventListeners();
     renderAll();
-    loadPlaces().then(() => {
-      navigateFromHash();
-    });
+    loadPlaces();
     syncFavoritesWithAuth();
     if (window.innerWidth <= 768) {
       setupMobileFavoriteButton();
-    }
-    window.addEventListener('hashchange', () => {
-      if (!ignoreHashChange) {
-        navigateFromHash();
-      }
-    });
-  }
-
-  function navigateFromHash() {
-    const hash = window.location.hash;
-    const match = hash.match(/^#\/place\/(.+)$/);
-    if (match) {
-      const placeId = decodeURIComponent(match[1]);
-      if (activePlace && activePlace.id === placeId) return;
-      const place = places.find(p => p.id === placeId);
-      if (place) {
-        handlePlaceSelect(place);
-      } else {
-        onStatusMessage?.('Место не найдено.', 'error');
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
-    } else if (!hash && activePlace) {
-      clearActivePlace();
     }
   }
 
@@ -863,10 +837,6 @@ export function createPlacesController({
     }
     mapController.setView(place.coordinates, 15);
 
-    ignoreHashChange = true;
-    window.location.hash = '/place/' + encodeURIComponent(place.id);
-    setTimeout(() => { ignoreHashChange = false; }, 50);
-
     if (elements.sidebarAccountPanel?.classList.contains('active')) {
       elements.sidebarAccountPanel.classList.remove('active');
     }
@@ -897,11 +867,6 @@ export function createPlacesController({
 
   function clearActivePlace() {
     activePlace = null;
-    if (window.location.hash.startsWith('#/place/')) {
-      ignoreHashChange = true;
-      history.replaceState(null, '', window.location.pathname + window.location.search);
-      setTimeout(() => { ignoreHashChange = false; }, 50);
-    }
     renderAll();
   }
 
@@ -973,39 +938,6 @@ export function createPlacesController({
     }
   }
 
-  // Mobile favorite button functionality
-  function setupMobileFavoriteButton() {
-    const mobileFavoriteButton = document.getElementById('mobileFavoriteButton');
-    if (!mobileFavoriteButton) return;
-
-    mobileFavoriteButton.addEventListener('click', () => {
-      if (!getCurrentUser()) {
-        window.StudentMapAuth?.openAuthModal?.('register');
-        onStatusMessage?.('Войдите, чтобы сохранять места в избранное.', 'info');
-        return;
-      }
-
-      if (currentCategory === 'favorite') {
-        setCategory('all');
-      } else {
-        setCategory('favorite');
-      }
-    });
-  }
-
-  function updateMobileFavoriteCount() {
-    const favoriteCount = document.getElementById('mobileFavoriteCount');
-    if (!favoriteCount) return;
-
-    const count = favoritePlaceIds.size;
-    if (count > 0) {
-      favoriteCount.textContent = count;
-      favoriteCount.style.display = 'flex';
-    } else {
-      favoriteCount.style.display = 'none';
-    }
-  }
-
   return {
     handleMapClick,
     handlePlaceSelect,
@@ -1035,10 +967,7 @@ function buildPlaceDetailMarkup({ place, category, reviewState, currentUser, isF
   const links = [];
 
   if (place.links?.website) {
-    const safeHref = sanitizeUrl(place.links.website);
-    if (safeHref) {
-      links.push('<a class="place-detail-link secondary" href="' + safeHref + '" target="_blank" rel="noreferrer">Сайт</a>');
-    }
+    links.push('<a class="place-detail-link secondary" href="' + place.links.website + '" target="_blank" rel="noreferrer">Сайт</a>');
   }
 
   return `
@@ -1282,16 +1211,6 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function sanitizeUrl(url) {
-  try {
-    const parsed = new URL(url, window.location.origin);
-    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
-      return parsed.href;
-    }
-  } catch (_) {}
-  return null;
-}
-
 function buildFavoriteButtonMarkup(placeId, { isFavorite, isPending, compact = false, fullWidth = false }) {
   const label = isFavorite ? 'Убрать из избранного' : 'Добавить в избранное';
   const classes = [
@@ -1329,4 +1248,35 @@ async function readJsonResponse(response) {
   } catch (error) {
     return {};
   }
+}
+
+// Mobile favorite button functionality
+function setupMobileFavoriteButton() {
+  const mobileFavoriteButton = document.getElementById('mobileFavoriteButton');
+  if (!mobileFavoriteButton) return;
+
+  mobileFavoriteButton.addEventListener('click', () => {
+    if (!getCurrentUser()) {
+      window.StudentMapAuth?.openAuthModal?.('register');
+      onStatusMessage?.('Войдите, чтобы сохранять места в избранное.', 'info');
+      return;
+    }
+
+    setCategory('favorite');
+    mobileFavoriteButton.classList.toggle('active', currentCategory === 'favorite');
+  });
+}
+
+function updateMobileFavoriteCount() {
+  const favoriteCount = document.getElementById('mobileFavoriteCount');
+  if (!favoriteCount) return;
+
+  const count = favoritePlaceIds.size;
+  if (count > 0) {
+    favoriteCount.textContent = count;
+    favoriteCount.style.display = 'flex';
+  } else {
+    favoriteCount.style.display = 'none';
+  }
+}
 }

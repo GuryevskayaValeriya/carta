@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const adminRoutes = require('./routes/admin.routes');
 const placesRoutes = require('./routes/places.routes');
@@ -12,19 +13,32 @@ const { resolveAdminAccess } = require('./utils/admin');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
+app.use(helmet());
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
+
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Слишком много запросов. Попробуйте позже.' }
+});
+
+const routeLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 30,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Слишком много запросов маршрутов.' }
+});
 
 app.get('/admin', async (req, res) => {
   try {
     const access = await resolveAdminAccess(req);
-
     if (!access.isAdmin) {
       return res.redirect('/');
     }
-
     return res.sendFile(path.join(__dirname, '../public/admin.html'));
   } catch (error) {
     console.error('Failed to open admin panel:', error);
@@ -35,11 +49,9 @@ app.get('/admin', async (req, res) => {
 app.get('/admin.html', async (req, res) => {
   try {
     const access = await resolveAdminAccess(req);
-
     if (!access.isAdmin) {
       return res.redirect('/');
     }
-
     return res.sendFile(path.join(__dirname, '../public/admin.html'));
   } catch (error) {
     console.error('Failed to open admin panel:', error);
@@ -47,17 +59,15 @@ app.get('/admin.html', async (req, res) => {
   }
 });
 
-// Статические файлы (теперь из папки public)
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, '../public'), {
+  maxAge: '7d'
+}));
 
-// API Routes - Specific routes first!
 app.get('/api/categories', async (req, res) => {
-    // Hardcoded categories for now, or fetch from DB if needed
-    res.json(['food', 'fun', 'study', 'print']);
+  res.json(['food', 'fun', 'study', 'print']);
 });
 
-// Прокси для маршрутизации (GraphHopper)
-app.get('/api/route', async (req, res) => {
+app.get('/api/route', routeLimiter, async (req, res) => {
   const { from, to, profile = 'foot' } = req.query;
   if (!from || !to) {
     return res.status(400).json({ error: 'Missing coordinates' });
@@ -65,7 +75,6 @@ app.get('/api/route', async (req, res) => {
 
   const validProfiles = ['driving', 'foot'];
   const routeProfile = validProfiles.includes(profile) ? profile : 'foot';
-  
   const ghProfile = routeProfile === 'driving' ? 'car' : routeProfile;
   const apiKey = process.env.GRAPHHOPPER_API_KEY;
 
@@ -82,7 +91,7 @@ app.get('/api/route', async (req, res) => {
       throw new Error(`GraphHopper API error: ${response.statusText}`);
     }
     const data = await response.json();
-    
+
     if (!data.paths || !data.paths[0]) {
       throw new Error('No route found');
     }
@@ -98,19 +107,17 @@ app.get('/api/route', async (req, res) => {
       }]
     });
   } catch (error) {
-    console.error('Route proxy error:', error);
+    console.error('Route proxy error:', error.message);
     res.status(500).json({ error: 'Failed to fetch route' });
   }
 });
 
-// General resource routes last
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', favoritesRoutes);
 app.use('/api', reviewsRoutes);
 app.use('/api/places', placesRoutes);
 
-// Запуск сервера
 app.listen(PORT, () => {
   console.log(`🚀 Сервер запущен: http://localhost:${PORT}`);
 });

@@ -7,8 +7,8 @@ body {
   margin: 0;
   min-height: 100%;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #eef2ff;
-  color: #0f172a;
+  background: var(--indigo-50);
+  color: var(--navy);
 }
 
 body {
@@ -30,8 +30,8 @@ select {
 
 .admin-sidebar {
   padding: 28px 20px;
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--navy);
+  color: var(--slate-200);
   display: flex;
   flex-direction: column;
   gap: 28px;
@@ -42,7 +42,7 @@ select {
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #93c5fd;
+  color: var(--blue-300);
 }
 
 .admin-brand-title {
@@ -53,7 +53,7 @@ select {
 
 .admin-brand-text {
   margin: 0;
-  color: #94a3b8;
+  color: var(--slate-400);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -71,7 +71,7 @@ select {
   width: 100%;
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: rgba(15, 23, 42, 0.45);
-  color: #e2e8f0;
+  color: var(--slate-200);
   padding: 13px 14px;
   border-radius: 16px;
   cursor: pointer;
@@ -116,7 +116,7 @@ select {
   border-radius: 14px;
   border: 1px solid rgba(148, 163, 184, 0.24);
   background: rgba(255, 255, 255, 0.08);
-  color: #f8fafc;
+  color: var(--slate-50);
   text-decoration: none;
   cursor: pointer;
 }
@@ -140,7 +140,7 @@ select {
 }
 
 .admin-header-kicker {
-  color: #64748b;
+  color: var(--slate-500);
   font-size: 13px;
   font-weight: 700;
 }
@@ -157,29 +157,29 @@ select {
   justify-content: center;
   padding: 10px 14px;
   border-radius: 999px;
-  background: #ffffff;
-  border: 1px solid #dbe3ef;
+  background: var(--white);
+  border: 1px solid var(--border-accent);
   font-size: 13px;
   font-weight: 700;
 }
 
 .admin-status {
   min-height: 22px;
-  color: #475569;
+  color: var(--slate-600);
   font-size: 14px;
   font-weight: 600;
 }
 
 .admin-status[data-tone="success"] {
-  color: #166534;
+  color: var(--green-800);
 }
 
 .admin-status[data-tone="error"] {
-  color: #b91c1c;
+  color: var(--red-700);
 }
 
 .admin-status[data-tone="info"] {
-  color: #1d4ed8;
+  color: var(--blue-700);
 }
 
 .admin-view {
@@ -205,10 +205,10 @@ select {
 
 .admin-search-box input {
   width: 100%;
-  border: 1px solid #dbe3ef;
+  border: 1px solid var(--border-accent);
   border-radius: 16px;
   padding: 13px 15px;
-  background: #ffffff;
+  background: var(--white);
 }
 
 .admin-primary-btn,
@@ -222,18 +222,18 @@ select {
 }
 
 .admin-primary-btn {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--blue-600), var(--blue));
+  color: var(--white);
 }
 
 .admin-secondary-btn {
-  background: #e2e8f0;
-  color: #334155;
+  background: var(--slate-200);
+  color: var(--slate-700);
 }
 
 .admin-danger-btn {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: var(--red-100);
+  color: var(--red-700);
 }
 
 .admin-split-layout {
@@ -246,7 +246,7 @@ select {
 .admin-list,
 .admin-editor {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid #dbe3ef;
+  border: 1px solid var(--border-accent);
   border-radius: 24px;
   padding: 18px;
   box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
@@ -262,15 +262,15 @@ select {
 
 .admin-card {
   padding: 16px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--slate-200);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--white);
   display: grid;
   gap: 10px;
 }
 
 .admin-card.active {
-  border-color: #60a5fa;
+  border-color: var(--blue-400);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
@@ -292,7 +292,7 @@ select {
 .admin-empty-text,
 .admin-editor-hint,
 .admin-field-hint {
-  color: #64748b;
+  color: var(--slate-500);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -310,8 +310,8 @@ select {
   align-items: center;
   padding: 6px 10px;
   border-radius: 999px;
-  background: #f1f5f9;
-  color: #334155;
+  background: var(--slate-100);
+  color: var(--slate-700);
   font-size: 12px;
   font-weight: 700;
 }
@@ -351,18 +351,18 @@ select {
 .admin-field span {
   font-size: 13px;
   font-weight: 700;
-  color: #334155;
+  color: var(--slate-700);
 }
 
 .admin-field input,
 .admin-field textarea,
 .admin-field select {
   width: 100%;
-  border: 1px solid #dbe3ef;
+  border: 1px solid var(--border-accent);
   border-radius: 14px;
   padding: 12px 14px;
-  background: #ffffff;
-  color: #0f172a;
+  background: var(--white);
+  color: var(--navy);
 }
 
 .admin-field textarea {
@@ -374,9 +374,9 @@ select {
   display: grid;
   gap: 12px;
   padding: 14px;
-  border: 1px solid #dbe3ef;
+  border: 1px solid var(--border-accent);
   border-radius: 18px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  background: linear-gradient(180deg, var(--white) 0%, var(--slate-50) 100%);
 }
 
 .admin-map-picker-header {
@@ -389,12 +389,12 @@ select {
 .admin-map-picker-title {
   font-size: 15px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--navy);
 }
 
 .admin-map-picker-text,
 .admin-map-picker-status {
-  color: #64748b;
+  color: var(--slate-500);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -408,12 +408,12 @@ select {
   height: 260px;
   border-radius: 18px;
   overflow: hidden;
-  border: 1px solid #dbe3ef;
-  background: #e2e8f0;
+  border: 1px solid var(--border-accent);
+  background: var(--slate-200);
 }
 
 .admin-place-map .leaflet-control-zoom a {
-  color: #0f172a;
+  color: var(--navy);
 }
 
 .admin-checkbox-row {
@@ -428,7 +428,7 @@ select {
   gap: 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: var(--slate-700);
 }
 
 .admin-checkbox input {
@@ -439,15 +439,15 @@ select {
 .admin-empty {
   padding: 28px 16px;
   text-align: center;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed var(--slate-300);
   border-radius: 18px;
-  background: #ffffff;
+  background: var(--white);
 }
 
 .admin-loading {
   padding: 22px;
   text-align: center;
-  color: #475569;
+  color: var(--slate-600);
   font-weight: 700;
 }
 
